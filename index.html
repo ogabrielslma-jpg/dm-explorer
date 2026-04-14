@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DM Explorer — Instagram</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0e0e0f;
+  --surface: #161618;
+  --surface2: #1e1e21;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.12);
+  --text: #f0eeea;
+  --muted: #7a7875;
+  --accent: #c8f53f;
+  --accent-dim: rgba(200,245,63,0.12);
+  --accent-text: #0e0e0f;
+  --red: #ff5c5c;
+  --blue: #5c9fff;
+  --font: 'Syne', sans-serif;
+  --mono: 'DM Mono', monospace;
+  --radius: 10px;
+  --radius-lg: 16px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* scrollbar */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+/* Layout */
+#app { min-height: 100vh; }
+
+/* ── UPLOAD SCREEN ── */
+#upload-view {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.logo {
+  font-size: 13px;
+  font-family: var(--mono);
+  color: var(--muted);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 3rem;
+}
+
+.logo span { color: var(--accent); }
+
+.drop-zone {
+  width: 100%;
+  max-width: 480px;
+  border: 1.5px dashed var(--border2);
+  border-radius: var(--radius-lg);
+  padding: 3rem 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  position: relative;
+}
+
+.drop-zone:hover, .drop-zone.over {
+  border-color: var(--accent);
+  background: var(--accent-dim);
+}
+
+.drop-zone input { display: none; }
+
+.drop-icon {
+  width: 48px; height: 48px;
+  border: 1.5px solid var(--border2);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 1.25rem;
+  color: var(--muted);
+}
+
+.drop-zone h2 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: var(--text);
+}
+
+.drop-zone p {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.drop-zone .hint {
+  margin-top: 1.5rem;
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.tag {
+  font-size: 11px;
+  font-family: var(--mono);
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: var(--surface2);
+  color: var(--muted);
+  border: 1px solid var(--border);
+}
+
+.progress-wrap {
+  width: 100%;
+  max-width: 480px;
+  margin-top: 1.5rem;
+}
+
+.progress-label {
+  font-size: 12px;
+  font-family: var(--mono);
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.progress-track {
+  height: 2px;
+  background: var(--surface2);
+  border-radius: 1px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 1px;
+  transition: width 0.3s ease;
+}
+
+/* ── DASHBOARD ── */
+#dashboard-view { display: none; min-height: 100vh; }
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  background: rgba(14,14,15,0.92);
+  backdrop-filter: blur(12px);
+  z-index: 10;
+}
+
+.topbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.brand-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.brand-sub {
+  font-size: 11px;
+  font-family: var(--mono);
+  color: var(--muted);
+}
+
+.topbar-actions { display: flex; gap: 8px; align-items: center; }
+
+.btn {
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: 1px solid var(--border2);
+  background: var(--surface2);
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn:hover { border-color: var(--accent); color: var(--accent); }
+
+.btn-accent {
+  background: var(--accent);
+  color: var(--accent-text);
+  border-color: var(--accent);
+  font-weight: 600;
+}
+
+.btn-accent:hover { opacity: 0.85; color: var(--accent-text); }
+
+.layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  height: calc(100vh - 57px);
+}
+
+/* ── SIDEBAR ── */
+.sidebar {
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.sidebar-header {
+  padding: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.search-input {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px 12px;
+  font-family: var(--font);
+  font-size: 13px;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.search-input::placeholder { color: var(--muted); }
+.search-input:focus { border-color: var(--border2); }
+
+.metrics-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  padding: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.metric-card {
+  background: var(--surface2);
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.metric-val {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1;
+}
+
+.metric-lbl {
+  font-size: 10px;
+  font-family: var(--mono);
+  color: var(--muted);
+  margin-top: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.convo-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 6px;
+}
+
+.convo-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.convo-item:hover { background: var(--surface2); }
+.convo-item.active { background: var(--accent-dim); }
+
+.avatar {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+.convo-item.active .avatar { border-color: var(--accent); color: var(--accent); }
+
+.convo-info { flex: 1; min-width: 0; }
+
+.convo-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.convo-preview {
+  font-size: 11px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 1px;
+}
+
+.convo-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+  flex-shrink: 0;
+}
+
+.badge {
+  font-size: 10px;
+  font-family: var(--mono);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.badge-photo { background: rgba(200,245,63,0.15); color: var(--accent); }
+.badge-msg { background: var(--surface2); color: var(--muted); }
+
+/* ── MAIN PANEL ── */
+.main {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.panel-tabs {
+  display: flex;
+  gap: 2px;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.panel-tab {
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 5px 14px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.panel-tab:hover { color: var(--text); }
+.panel-tab.active { background: var(--surface2); color: var(--text); }
+
+.panel-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.25rem;
+}
+
+/* ── MESSAGES ── */
+.msg-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 100%;
+}
+
+.msg-date-sep {
+  text-align: center;
+  font-size: 10px;
+  font-family: var(--mono);
+  color: var(--muted);
+  padding: 8px 0;
+}
+
+.msg-row { display: flex; }
+.msg-row.me { justify-content: flex-end; }
+.msg-row.other { justify-content: flex-start; }
+
+.bubble {
+  max-width: 68%;
+  padding: 8px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.bubble.me {
+  background: var(--accent);
+  color: var(--accent-text);
+  border-bottom-right-radius: 3px;
+  font-weight: 500;
+}
+
+.bubble.other {
+  background: var(--surface2);
+  color: var(--text);
+  border-bottom-left-radius: 3px;
+}
+
+.bubble-media {
+  font-size: 11px;
+  font-family: var(--mono);
+  opacity: 0.6;
+  padding: 6px 10px;
+  border: 1px dashed var(--border2);
+  border-radius: 8px;
+  background: transparent;
+  max-width: 160px;
+}
+
+.bubble-meta {
+  font-size: 10px;
+  font-family: var(--mono);
+  margin-top: 3px;
+  opacity: 0.5;
+}
+.msg-row.me .bubble-meta { text-align: right; }
+
+/* ── PHOTO GRID ── */
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 6px;
+}
+
+.photo-thumb {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: transform 0.15s, border-color 0.15s;
+}
+
+.photo-thumb:hover { transform: scale(1.03); border-color: var(--accent); }
+
+.photo-info {
+  font-size: 11px;
+  font-family: var(--mono);
+  color: var(--muted);
+  margin-top: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── SEARCH ── */
+.search-result {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.search-result:hover { border-color: var(--border2); }
+
+.search-result-meta {
+  font-size: 11px;
+  font-family: var(--mono);
+  color: var(--muted);
+  margin-bottom: 5px;
+}
+
+.search-result-text {
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.5;
+}
+
+mark {
+  background: rgba(200,245,63,0.25);
+  color: var(--accent);
+  border-radius: 2px;
+  padding: 0 1px;
+}
+
+/* ── EMPTY STATES ── */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 200px;
+  color: var(--muted);
+  font-size: 13px;
+  text-align: center;
+  gap: 8px;
+}
+
+.empty-state .icon {
+  font-size: 28px;
+  opacity: 0.4;
+  margin-bottom: 4px;
+}
+
+/* ── LIGHTBOX ── */
+.lightbox {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.92);
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.lightbox.open { display: flex; }
+
+.lightbox img {
+  max-width: 90vw;
+  max-height: 85vh;
+  object-fit: contain;
+  border-radius: var(--radius);
+}
+
+.lightbox-close {
+  position: absolute;
+  top: 1rem;
+  right: 1.25rem;
+  font-size: 24px;
+  color: var(--muted);
+  cursor: pointer;
+  background: none;
+  border: none;
+  line-height: 1;
+}
+
+.lightbox-close:hover { color: var(--text); }
+
+.lightbox-info {
+  position: absolute;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 12px;
+  font-family: var(--mono);
+  color: var(--muted);
+  text-align: center;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 640px) {
+  .layout { grid-template-columns: 1fr; }
+  .sidebar { height: 50vh; }
+}
+</style>
+</head>
+<body>
+
+<div id="app">
+
+<!-- UPLOAD -->
+<div id="upload-view">
+  <div class="logo"><span>DM</span> Explorer</div>
+
+  <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+    <input type="file" id="fileInput" accept=".zip" multiple>
+    <div class="drop-icon">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+        <polyline points="17 8 12 3 7 8"/>
+        <line x1="12" y1="3" x2="12" y2="15"/>
+      </svg>
+    </div>
+    <h2>Solte o ZIP aqui</h2>
+    <p>Carregue um ou mais exports do Instagram<br>Tudo roda localmente — nenhum dado é enviado</p>
+    <div class="hint">
+      <span class="tag">conversas</span>
+      <span class="tag">fotos</span>
+      <span class="tag">áudios</span>
+      <span class="tag">busca</span>
+    </div>
+  </div>
+
+  <div class="progress-wrap" id="progressWrap" style="display:none">
+    <div class="progress-label" id="progressLabel">Aguardando...</div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard-view">
+  <div class="topbar">
+    <div class="topbar-brand">
+      <div class="brand-dot"></div>
+      <div>
+        <div class="brand-name" id="brandName">DM Explorer</div>
+        <div class="brand-sub" id="brandSub">—</div>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn btn-accent" onclick="document.getElementById('fileInput2').click()">+ Adicionar ZIP</button>
+      <input type="file" id="fileInput2" accept=".zip" multiple style="display:none">
+      <button class="btn" onclick="resetApp()">Limpar</button>
+    </div>
+  </div>
+
+  <div class="layout">
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <input class="search-input" type="text" id="convoSearch" placeholder="Buscar conversa..." oninput="renderConvoList()">
+      </div>
+      <div class="metrics-row">
+        <div class="metric-card">
+          <div class="metric-val" id="mConvos">0</div>
+          <div class="metric-lbl">Conversas</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-val" id="mMsgs">0</div>
+          <div class="metric-lbl">Mensagens</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-val" id="mPhotos">0</div>
+          <div class="metric-lbl">Fotos</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-val" id="mAudios">0</div>
+          <div class="metric-lbl">Áudios</div>
+        </div>
+      </div>
+      <div class="convo-list" id="convoList"></div>
+    </div>
+
+    <div class="main">
+      <div class="panel-tabs">
+        <button class="panel-tab active" onclick="switchTab('msgs',this)">Mensagens</button>
+        <button class="panel-tab" onclick="switchTab('photos',this)">Fotos <span id="photoTabCount"></span></button>
+        <button class="panel-tab" onclick="switchTab('search',this)">Buscar</button>
+        <button class="panel-tab" onclick="switchTab('all-photos',this)">Todas as fotos</button>
+      </div>
+      <div class="panel-content" id="panelContent">
+        <div class="empty-state">
+          <div class="icon">💬</div>
+          <div>Selecione uma conversa</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
+  <button class="lightbox-close" onclick="document.getElementById('lightbox').classList.remove('open')">✕</button>
+  <img id="lightboxImg" src="" alt="">
+  <div class="lightbox-info" id="lightboxInfo"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+
+let state = {
+  convos: [],
+  allPhotos: [],
+  myName: '',
+  currentFolder: null,
+  currentTab: 'msgs'
+};
+
+// ── PROGRESS ──
+function setProgress(pct, label) {
+  $('progressFill').style.width = pct + '%';
+  $('progressLabel').textContent = label;
+}
+
+// ── LOAD ZIP ──
+async function processZip(file) {
+  $('progressWrap').style.display = 'block';
+  setProgress(5, 'Abrindo ' + file.name + '...');
+
+  let zip;
+  try {
+    zip = await JSZip.loadAsync(file);
+  } catch(e) {
+    setProgress(0, 'Erro ao abrir o arquivo. Certifique-se que é um ZIP válido.');
+    return;
+  }
+
+  setProgress(15, 'Mapeando estrutura...');
+  const jsonFiles = Object.keys(zip.files).filter(f =>
+    f.includes('/messages/inbox/') && f.endsWith('message_1.json')
+  );
+
+  if (!jsonFiles.length) {
+    setProgress(0, 'Nenhuma conversa encontrada. Verifique se é um export do Instagram.');
+    return;
+  }
+
+  const newConvos = [];
+  const newPhotos = [];
+
+  for (let i = 0; i < jsonFiles.length; i++) {
+    setProgress(15 + Math.round((i / jsonFiles.length) * 75),
+      `Conversa ${i + 1} de ${jsonFiles.length}...`);
+    try {
+      const txt = await zip.files[jsonFiles[i]].async('string');
+      const data = JSON.parse(txt);
+      const parts = jsonFiles[i].split('/');
+      const folder = parts[parts.length - 2];
+      const participants = (data.participants || []).map(p => p.name || '?');
+      const messages = data.messages || [];
+
+      // detectar meu nome pelo remetente mais frequente
+      if (!state.myName && messages.length > 2) {
+        const freq = {};
+        messages.forEach(m => { freq[m.sender_name] = (freq[m.sender_name] || 0) + 1; });
+        state.myName = Object.keys(freq).sort((a, b) => freq[b] - freq[a])[0];
+      }
+
+      const photos = [];
+      let audioCount = 0;
+      for (const msg of messages) {
+        if (msg.photos) {
+          for (const ph of msg.photos) {
+            const fileObj = zip.files[ph.uri];
+            photos.push({ uri: ph.uri, sender: msg.sender_name, ts: msg.timestamp_ms, fileObj });
+            newPhotos.push({ uri: ph.uri, sender: msg.sender_name, ts: msg.timestamp_ms, fileObj, folder, participants });
+          }
+        }
+        if (msg.audio) audioCount++;
+      }
+
+      newConvos.push({ folder, participants, messages, photos, audioCount });
+    } catch(e) {}
+  }
+
+  // merge com conversas existentes (suporte a múltiplos ZIPs)
+  for (const nc of newConvos) {
+    const existing = state.convos.find(c => c.folder === nc.folder);
+    if (!existing) state.convos.push(nc);
+  }
+  state.allPhotos = [...state.allPhotos, ...newPhotos].sort((a, b) => b.ts - a.ts);
+  state.convos.sort((a, b) => (b.messages[0]?.timestamp_ms || 0) - (a.messages[0]?.timestamp_ms || 0));
+
+  setProgress(100, 'Pronto!');
+  setTimeout(showDashboard, 400);
+}
+
+function showDashboard() {
+  $('upload-view').style.display = 'none';
+  $('dashboard-view').style.display = 'block';
+  updateMetrics();
+  renderConvoList();
+}
+
+function updateMetrics() {
+  const totalMsgs = state.convos.reduce((s, c) => s + c.messages.length, 0);
+  const totalAudios = state.convos.reduce((s, c) => s + c.audioCount, 0);
+  $('mConvos').textContent = state.convos.length;
+  $('mMsgs').textContent = totalMsgs > 999 ? (totalMsgs / 1000).toFixed(1) + 'k' : totalMsgs;
+  $('mPhotos').textContent = state.allPhotos.length;
+  $('mAudios').textContent = totalAudios;
+  $('brandName').textContent = state.myName ? state.myName + ' — DMs' : 'DM Explorer';
+  $('brandSub').textContent = state.convos.length + ' conversas carregadas';
+}
+
+function renderConvoList() {
+  const q = ($('convoSearch')?.value || '').toLowerCase();
+  const filtered = state.convos.filter(c =>
+    !q || c.participants.join(' ').toLowerCase().includes(q)
+  );
+  $('convoList').innerHTML = filtered.slice(0, 120).map(c => {
+    const other = c.participants.filter(p => p !== state.myName);
+    const name = other.length ? other.join(', ') : (c.participants[0] || '?');
+    const initials = name.split(' ').slice(0, 2).map(w => w[0] || '').join('').toUpperCase();
+    const last = c.messages[0];
+    const preview = last ? (last.content || '[mídia]').substring(0, 45) : '';
+    const date = last ? fmtDate(last.timestamp_ms) : '';
+    const isActive = c.folder === state.currentFolder;
+    return `<div class="convo-item${isActive ? ' active' : ''}" onclick="openConvo('${c.folder}')">
+      <div class="avatar">${initials}</div>
+      <div class="convo-info">
+        <div class="convo-name">${esc(name)}</div>
+        <div class="convo-preview">${esc(preview)}</div>
+      </div>
+      <div class="convo-meta">
+        <span style="font-size:10px;font-family:var(--mono);color:var(--muted)">${date}</span>
+        ${c.photos.length ? `<span class="badge badge-photo">${c.photos.length} fotos</span>` : ''}
+      </div>
+    </div>`;
+  }).join('') || '<div class="empty-state" style="min-height:80px"><div>Nenhuma conversa</div></div>';
+}
+
+// ── OPEN CONVO ──
+function openConvo(folder) {
+  state.currentFolder = folder;
+  state.currentTab = 'msgs';
+  renderConvoList();
+  const c = state.convos.find(x => x.folder === folder);
+  if (!c) return;
+  // update tab label
+  $('photoTabCount').textContent = c.photos.length ? `(${c.photos.length})` : '';
+  // activate msgs tab
+  document.querySelectorAll('.panel-tab').forEach((t,i) => t.classList.toggle('active', i===0));
+  renderMessages(c);
+}
+
+function renderMessages(c) {
+  const msgs = [...c.messages].reverse();
+  let html = '<div class="msg-list" id="msgList">';
+  let lastDate = '';
+  for (const m of msgs.slice(-80)) {
+    const d = fmtDateFull(m.timestamp_ms);
+    if (d !== lastDate) {
+      html += `<div class="msg-date-sep">${d}</div>`;
+      lastDate = d;
+    }
+    const isMe = m.sender_name === state.myName;
+    const cls = isMe ? 'me' : 'other';
+    html += `<div class="msg-row ${cls}">`;
+    if (m.content) {
+      html += `<div class="bubble ${cls}">${esc(m.content)}</div>`;
+    }
+    if (m.photos) {
+      m.photos.forEach(() => {
+        html += `<div class="bubble-media ${cls}">[foto]</div>`;
+      });
+    }
+    if (m.audio) {
+      html += `<div class="bubble-media ${cls}">[áudio]</div>`;
+    }
+    if (m.videos) {
+      m.videos.forEach(() => {
+        html += `<div class="bubble-media ${cls}">[vídeo]</div>`;
+      });
+    }
+    html += `<div class="bubble-meta">${fmtTime(m.timestamp_ms)}</div>`;
+    html += '</div>';
+  }
+  if (msgs.length > 80) {
+    html += `<div class="msg-date-sep">... mais ${msgs.length - 80} mensagens anteriores</div>`;
+  }
+  html += '</div>';
+  $('panelContent').innerHTML = html;
+  const ml = $('msgList');
+  if (ml) ml.scrollTop = ml.scrollHeight;
+}
+
+// ── TABS ──
+function switchTab(tab, btn) {
+  document.querySelectorAll('.panel-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  state.currentTab = tab;
+
+  if (tab === 'msgs') {
+    const c = state.convos.find(x => x.folder === state.currentFolder);
+    if (c) renderMessages(c);
+    else $('panelContent').innerHTML = '<div class="empty-state"><div class="icon">💬</div><div>Selecione uma conversa</div></div>';
+  } else if (tab === 'photos') {
+    renderConvoPhotos();
+  } else if (tab === 'search') {
+    renderSearch();
+  } else if (tab === 'all-photos') {
+    renderAllPhotos();
+  }
+}
+
+async function renderConvoPhotos() {
+  const c = state.convos.find(x => x.folder === state.currentFolder);
+  if (!c || !c.photos.length) {
+    $('panelContent').innerHTML = '<div class="empty-state"><div class="icon">📷</div><div>Nenhuma foto nesta conversa</div></div>';
+    return;
+  }
+  $('panelContent').innerHTML = '<div class="empty-state"><div>Carregando fotos...</div></div>';
+  let html = `<div class="photo-grid">`;
+  const thumbs = await Promise.all(c.photos.map(async ph => {
+    if (!ph.fileObj) return null;
+    try {
+      const blob = await ph.fileObj.async('blob');
+      const url = URL.createObjectURL(blob);
+      const date = fmtDate(ph.ts);
+      return { url, sender: ph.sender, date };
+    } catch { return null; }
+  }));
+  const valid = thumbs.filter(Boolean);
+  html = `<div class="photo-grid">` + valid.map(t =>
+    `<div>
+      <img class="photo-thumb" src="${t.url}" onclick="openLightbox('${t.url}','${esc(t.sender)} · ${t.date}')">
+      <div class="photo-info">${esc(t.sender)}</div>
+    </div>`
+  ).join('') + '</div>';
+  if (!valid.length) html = '<div class="empty-state"><div>Erro ao carregar fotos</div></div>';
+  $('panelContent').innerHTML = html;
+}
+
+async function renderAllPhotos() {
+  $('panelContent').innerHTML = '<div class="empty-state"><div>Carregando todas as fotos...</div></div>';
+  const photos = state.allPhotos.slice(0, 200);
+  const thumbs = await Promise.all(photos.map(async ph => {
+    if (!ph.fileObj) return null;
+    try {
+      const blob = await ph.fileObj.async('blob');
+      const url = URL.createObjectURL(blob);
+      return { url, sender: ph.sender, date: fmtDate(ph.ts), participants: ph.participants };
+    } catch { return null; }
+  }));
+  const valid = thumbs.filter(Boolean);
+  const html = `
+    <p style="font-size:11px;font-family:var(--mono);color:var(--muted);margin-bottom:12px">
+      ${valid.length} de ${state.allPhotos.length} fotos
+    </p>
+    <div class="photo-grid">` +
+    valid.map(t =>
+      `<div>
+        <img class="photo-thumb" src="${t.url}" onclick="openLightbox('${t.url}','${esc(t.sender)} · ${t.date}')">
+        <div class="photo-info">${esc(t.sender)} · ${t.date}</div>
+      </div>`
+    ).join('') + '</div>';
+  $('panelContent').innerHTML = html;
+}
+
+function renderSearch() {
+  $('panelContent').innerHTML = `
+    <input class="search-input" type="text" id="globalSearch" placeholder="Buscar em todas as mensagens..." oninput="doSearch()" style="width:100%;margin-bottom:1rem">
+    <div id="searchOut"></div>`;
+}
+
+function doSearch() {
+  const q = ($('globalSearch')?.value || '').toLowerCase().trim();
+  const out = $('searchOut');
+  if (!out) return;
+  if (q.length < 2) { out.innerHTML = ''; return; }
+  const results = [];
+  for (const c of state.convos) {
+    const other = c.participants.filter(p => p !== state.myName);
+    const name = other.length ? other.join(', ') : (c.participants[0] || '?');
+    for (const m of c.messages) {
+      if ((m.content || '').toLowerCase().includes(q)) {
+        results.push({ msg: m, name, folder: c.folder });
+        if (results.length >= 60) break;
+      }
+    }
+    if (results.length >= 60) break;
+  }
+  if (!results.length) { out.innerHTML = '<div class="empty-state" style="min-height:80px"><div>Sem resultados</div></div>'; return; }
+  out.innerHTML = `<p style="font-size:11px;font-family:var(--mono);color:var(--muted);margin-bottom:10px">${results.length} resultado(s)</p>` +
+    results.map(r => `
+      <div class="search-result" onclick="openConvo('${r.folder}')">
+        <div class="search-result-meta">${esc(r.name)} · ${fmtDateFull(r.msg.timestamp_ms)}</div>
+        <div class="search-result-text">${highlight(r.msg.content || '', q)}</div>
+      </div>`).join('');
+}
+
+// ── LIGHTBOX ──
+function openLightbox(url, info) {
+  $('lightboxImg').src = url;
+  $('lightboxInfo').textContent = info;
+  $('lightbox').classList.add('open');
+}
+function closeLightbox(e) {
+  if (e.target === $('lightbox')) $('lightbox').classList.remove('open');
+}
+
+// ── RESET ──
+function resetApp() {
+  state = { convos: [], allPhotos: [], myName: '', currentFolder: null, currentTab: 'msgs' };
+  $('dashboard-view').style.display = 'none';
+  $('upload-view').style.display = 'flex';
+  $('progressWrap').style.display = 'none';
+  $('fileInput').value = '';
+}
+
+// ── HELPERS ──
+function esc(s) {
+  return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function highlight(text, q) {
+  return esc(text).replace(new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'), 'gi'),
+    m => `<mark>${m}</mark>`);
+}
+function fmtDate(ts) {
+  if (!ts) return '';
+  return new Date(ts).toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit', year:'2-digit' });
+}
+function fmtDateFull(ts) {
+  if (!ts) return '';
+  return new Date(ts).toLocaleDateString('pt-BR', { day:'2-digit', month:'short', year:'numeric' });
+}
+function fmtTime(ts) {
+  if (!ts) return '';
+  return new Date(ts).toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
+}
+
+// ── DRAG & DROP ──
+const dz = $('dropZone');
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('over'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('over'));
+dz.addEventListener('drop', e => {
+  e.preventDefault(); dz.classList.remove('over');
+  [...e.dataTransfer.files].filter(f => f.name.endsWith('.zip')).forEach(processZip);
+});
+
+$('fileInput').addEventListener('change', e => {
+  [...e.target.files].forEach(processZip);
+});
+$('fileInput2').addEventListener('change', e => {
+  [...e.target.files].forEach(f => processZip(f).then(updateMetrics).then(renderConvoList));
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') $('lightbox').classList.remove('open');
+});
+</script>
+</body>
+</html>
