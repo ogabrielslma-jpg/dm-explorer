@@ -749,7 +749,7 @@ async function processZip(file) {
   setProgress(38, 'Mapeando conversas...');
 
   const jsonFiles = Object.keys(zip.files).filter(f =>
-    f.includes('/messages/inbox/') && f.endsWith('message_1.json')
+    f.includes('/messages/inbox/') && /message_\d+\.json$/.test(f)
   );
 
   if (!jsonFiles.length) {
