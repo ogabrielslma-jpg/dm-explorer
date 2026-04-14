@@ -693,8 +693,12 @@ let state = {
   allPhotos: [],
   myName: '',
   currentFolder: null,
-  currentTab: 'msgs'
+  currentTab: 'msgs',
+  zipFiles: {}  // filename -> File object (kept for lazy photo loading)
 };
+
+// URL cache so we don't re-extract the same photo twice
+const urlCache = {};
 
 // ── PROGRESS ──
 function setProgress(pct, label) {
@@ -702,20 +706,48 @@ function setProgress(pct, label) {
   $('progressLabel').textContent = label;
 }
 
+// ── LAZY PHOTO LOADER ──
+// Reopens the zip on demand and extracts just the one file needed.
+// This avoids keeping 800MB in memory — only metadata is kept in state.
+async function loadPhotoUrl(uri) {
+  if (urlCache[uri]) return urlCache[uri];
+  // find which zip file contains this uri
+  const zipFile = state.zipFiles[uri];
+  if (!zipFile) return null;
+  try {
+    const zip = await JSZip.loadAsync(zipFile);
+    const entry = zip.files[uri];
+    if (!entry) return null;
+    const blob = await entry.async('blob');
+    const url = URL.createObjectURL(blob);
+    urlCache[uri] = url;
+    // free zip from memory immediately
+    return url;
+  } catch { return null; }
+}
+
 // ── LOAD ZIP ──
+// Strategy for large files: use JSZip in streaming mode.
+// We only keep JSON text in memory; photo entries store uri + which File they came from.
 async function processZip(file) {
   $('progressWrap').style.display = 'block';
-  setProgress(5, 'Abrindo ' + file.name + '...');
+  setProgress(5, 'Abrindo ' + file.name + ' (' + (file.size / 1024 / 1024).toFixed(0) + ' MB)...');
 
+  // For large files, use loadAsync with onUpdate callback for progress
   let zip;
   try {
-    zip = await JSZip.loadAsync(file);
+    zip = await JSZip.loadAsync(file, {
+      onUpdate: (meta) => {
+        if (meta.percent) setProgress(5 + Math.round(meta.percent * 0.3), 'Lendo arquivo... ' + Math.round(meta.percent) + '%');
+      }
+    });
   } catch(e) {
-    setProgress(0, 'Erro ao abrir o arquivo. Certifique-se que é um ZIP válido.');
+    setProgress(0, 'Erro ao abrir o arquivo. Tente um arquivo menor ou verifique se é um ZIP válido.');
     return;
   }
 
-  setProgress(15, 'Mapeando estrutura...');
+  setProgress(38, 'Mapeando conversas...');
+
   const jsonFiles = Object.keys(zip.files).filter(f =>
     f.includes('/messages/inbox/') && f.endsWith('message_1.json')
   );
@@ -725,12 +757,26 @@ async function processZip(file) {
     return;
   }
 
+  // Map all photo URIs to this File so we can lazy-load later
+  Object.keys(zip.files).forEach(path => {
+    if (path.includes('/photos/') && !path.endsWith('/')) {
+      state.zipFiles[path] = file;
+    }
+  });
+
+  // Free the zip object — we only needed the file listing and JSONs
+  // (photos will be re-extracted on demand from the original File)
+
   const newConvos = [];
   const newPhotos = [];
 
   for (let i = 0; i < jsonFiles.length; i++) {
-    setProgress(15 + Math.round((i / jsonFiles.length) * 75),
-      `Conversa ${i + 1} de ${jsonFiles.length}...`);
+    if (i % 10 === 0) {
+      setProgress(38 + Math.round((i / jsonFiles.length) * 57),
+        `Conversa ${i + 1} de ${jsonFiles.length}...`);
+      // yield to browser to keep UI responsive
+      await new Promise(r => setTimeout(r, 0));
+    }
     try {
       const txt = await zip.files[jsonFiles[i]].async('string');
       const data = JSON.parse(txt);
@@ -739,7 +785,6 @@ async function processZip(file) {
       const participants = (data.participants || []).map(p => p.name || '?');
       const messages = data.messages || [];
 
-      // detectar meu nome pelo remetente mais frequente
       if (!state.myName && messages.length > 2) {
         const freq = {};
         messages.forEach(m => { freq[m.sender_name] = (freq[m.sender_name] || 0) + 1; });
@@ -751,9 +796,9 @@ async function processZip(file) {
       for (const msg of messages) {
         if (msg.photos) {
           for (const ph of msg.photos) {
-            const fileObj = zip.files[ph.uri];
-            photos.push({ uri: ph.uri, sender: msg.sender_name, ts: msg.timestamp_ms, fileObj });
-            newPhotos.push({ uri: ph.uri, sender: msg.sender_name, ts: msg.timestamp_ms, fileObj, folder, participants });
+            // Store only uri + metadata — NOT the zip entry itself
+            photos.push({ uri: ph.uri, sender: msg.sender_name, ts: msg.timestamp_ms });
+            newPhotos.push({ uri: ph.uri, sender: msg.sender_name, ts: msg.timestamp_ms, folder, participants });
           }
         }
         if (msg.audio) audioCount++;
@@ -763,10 +808,11 @@ async function processZip(file) {
     } catch(e) {}
   }
 
-  // merge com conversas existentes (suporte a múltiplos ZIPs)
+  // Explicitly release the zip to free memory
+  zip = null;
+
   for (const nc of newConvos) {
-    const existing = state.convos.find(c => c.folder === nc.folder);
-    if (!existing) state.convos.push(nc);
+    if (!state.convos.find(c => c.folder === nc.folder)) state.convos.push(nc);
   }
   state.allPhotos = [...state.allPhotos, ...newPhotos].sort((a, b) => b.ts - a.ts);
   state.convos.sort((a, b) => (b.messages[0]?.timestamp_ms || 0) - (a.messages[0]?.timestamp_ms || 0));
@@ -900,52 +946,68 @@ async function renderConvoPhotos() {
     $('panelContent').innerHTML = '<div class="empty-state"><div class="icon">📷</div><div>Nenhuma foto nesta conversa</div></div>';
     return;
   }
-  $('panelContent').innerHTML = '<div class="empty-state"><div>Carregando fotos...</div></div>';
-  let html = `<div class="photo-grid">`;
-  const thumbs = await Promise.all(c.photos.map(async ph => {
-    if (!ph.fileObj) return null;
-    try {
-      const blob = await ph.fileObj.async('blob');
-      const url = URL.createObjectURL(blob);
-      const date = fmtDate(ph.ts);
-      return { url, sender: ph.sender, date };
-    } catch { return null; }
-  }));
-  const valid = thumbs.filter(Boolean);
-  html = `<div class="photo-grid">` + valid.map(t =>
-    `<div>
-      <img class="photo-thumb" src="${t.url}" onclick="openLightbox('${t.url}','${esc(t.sender)} · ${t.date}')">
-      <div class="photo-info">${esc(t.sender)}</div>
-    </div>`
-  ).join('') + '</div>';
-  if (!valid.length) html = '<div class="empty-state"><div>Erro ao carregar fotos</div></div>';
-  $('panelContent').innerHTML = html;
+  $('panelContent').innerHTML = '';
+  const grid = document.createElement('div');
+  grid.className = 'photo-grid';
+  $('panelContent').appendChild(grid);
+  for (const ph of c.photos) {
+    const wrapper = document.createElement('div');
+    const img = document.createElement('img');
+    img.className = 'photo-thumb';
+    img.style.background = 'var(--surface2)';
+    img.style.minHeight = '80px';
+    const info = document.createElement('div');
+    info.className = 'photo-info';
+    info.textContent = ph.sender;
+    wrapper.appendChild(img);
+    wrapper.appendChild(info);
+    grid.appendChild(wrapper);
+    loadPhotoUrl(ph.uri).then(url => {
+      if (url) {
+        img.src = url;
+        img.onclick = () => openLightbox(url, esc(ph.sender) + ' · ' + fmtDate(ph.ts));
+      } else {
+        wrapper.style.display = 'none';
+      }
+    });
+  }
 }
 
 async function renderAllPhotos() {
-  $('panelContent').innerHTML = '<div class="empty-state"><div>Carregando todas as fotos...</div></div>';
+  $('panelContent').innerHTML = '';
   const photos = state.allPhotos.slice(0, 200);
-  const thumbs = await Promise.all(photos.map(async ph => {
-    if (!ph.fileObj) return null;
-    try {
-      const blob = await ph.fileObj.async('blob');
-      const url = URL.createObjectURL(blob);
-      return { url, sender: ph.sender, date: fmtDate(ph.ts), participants: ph.participants };
-    } catch { return null; }
-  }));
-  const valid = thumbs.filter(Boolean);
-  const html = `
-    <p style="font-size:11px;font-family:var(--mono);color:var(--muted);margin-bottom:12px">
-      ${valid.length} de ${state.allPhotos.length} fotos
-    </p>
-    <div class="photo-grid">` +
-    valid.map(t =>
-      `<div>
-        <img class="photo-thumb" src="${t.url}" onclick="openLightbox('${t.url}','${esc(t.sender)} · ${t.date}')">
-        <div class="photo-info">${esc(t.sender)} · ${t.date}</div>
-      </div>`
-    ).join('') + '</div>';
-  $('panelContent').innerHTML = html;
+  const meta = document.createElement('p');
+  meta.style.cssText = 'font-size:11px;font-family:var(--mono);color:var(--muted);margin-bottom:12px';
+  meta.textContent = `${photos.length} de ${state.allPhotos.length} fotos (carregando...)`;
+  $('panelContent').appendChild(meta);
+  const grid = document.createElement('div');
+  grid.className = 'photo-grid';
+  $('panelContent').appendChild(grid);
+  let loaded = 0;
+  for (const ph of photos) {
+    const wrapper = document.createElement('div');
+    const img = document.createElement('img');
+    img.className = 'photo-thumb';
+    img.style.background = 'var(--surface2)';
+    img.style.minHeight = '80px';
+    const info = document.createElement('div');
+    info.className = 'photo-info';
+    info.textContent = (ph.sender || '') + ' · ' + fmtDate(ph.ts);
+    wrapper.appendChild(img);
+    wrapper.appendChild(info);
+    grid.appendChild(wrapper);
+    loadPhotoUrl(ph.uri).then(url => {
+      if (url) {
+        img.src = url;
+        const d = fmtDate(ph.ts);
+        img.onclick = () => openLightbox(url, esc(ph.sender) + ' · ' + d);
+        loaded++;
+        meta.textContent = `${loaded} de ${photos.length} fotos carregadas`;
+      } else {
+        wrapper.style.display = 'none';
+      }
+    });
+  }
 }
 
 function renderSearch() {
@@ -992,7 +1054,9 @@ function closeLightbox(e) {
 
 // ── RESET ──
 function resetApp() {
-  state = { convos: [], allPhotos: [], myName: '', currentFolder: null, currentTab: 'msgs' };
+  Object.values(urlCache).forEach(url => URL.revokeObjectURL(url));
+  Object.keys(urlCache).forEach(k => delete urlCache[k]);
+  state = { convos: [], allPhotos: [], myName: '', currentFolder: null, currentTab: 'msgs', zipFiles: {} };
   $('dashboard-view').style.display = 'none';
   $('upload-view').style.display = 'flex';
   $('progressWrap').style.display = 'none';
