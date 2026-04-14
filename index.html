@@ -804,42 +804,63 @@ async function processZip(file) {
           if (msg.audio) audioCount++;
         }
       } else {
-        // HTML format
+        // HTML format — Instagram export uses these classes:
+        // ._a6-g = message block, h2._a6-i = sender name
+        // ._a6-p > div > div > div > text = message content
+        // ._3-94._a6-o = timestamp
         const parser = new DOMParser();
         const doc = parser.parseFromString(txt, 'text/html');
-        // Participants from header
-        doc.querySelectorAll('._a6-p, .pam._3-95._2ph-._a6-g._a6-p').forEach(el => {
-          const n = el.textContent.trim();
-          if (n && !participants.includes(n)) participants.push(n);
-        });
-        if (!participants.length) {
-          const h = doc.querySelector('h1, ._a705');
-          if (h) participants = h.textContent.split(',').map(s => s.trim()).filter(Boolean);
+
+        // Participants from h1 title area
+        const titleEl = doc.querySelector('._a6-h, h1');
+        if (titleEl) {
+          titleEl.textContent.split(',').map(s => s.trim()).filter(Boolean)
+            .forEach(n => { if (!participants.includes(n)) participants.push(n); });
         }
-        // Messages
-        const msgEls = doc.querySelectorAll('._a6-g, div[class*="message"]');
-        msgEls.forEach(el => {
-          const senderEl = el.querySelector('._a6-p, .pam._3-95._2ph-._a6-p');
+
+        doc.querySelectorAll('._a6-g').forEach(msgEl => {
+          // Sender: h2 with class _a6-i
+          const senderEl = msgEl.querySelector('h2._a6-i, ._a6-i');
           const sender = senderEl ? senderEl.textContent.trim() : '?';
-          const contentEl = el.querySelector('._a6-q, .pam._3-95._2ph-._a6-q');
-          const content = contentEl ? contentEl.textContent.trim() : '';
-          const timeEl = el.querySelector('._a72d, ._a6-o');
-          const ts = timeEl ? (new Date(timeEl.textContent.trim()).getTime() || 0) : 0;
-          // Photos inside message
-          el.querySelectorAll('img[src*="photos"], a[href*="photos"]').forEach(imgEl => {
-            const src = imgEl.getAttribute('src') || imgEl.getAttribute('href') || '';
-            let uri = src.replace(/^\//, '');
-            if (uri.includes('photos/')) {
+
+          // Timestamp: div with classes _3-94 _a6-o
+          const timeEl = msgEl.querySelector('._a6-o');
+          const tsText = timeEl ? timeEl.textContent.trim() : '';
+          const ts = tsText ? (new Date(tsText).getTime() || 0) : 0;
+
+          // Content: inside ._a6-p, skip empty divs, get text nodes
+          const contentEl = msgEl.querySelector('._a6-p');
+          let content = '';
+          if (contentEl) {
+            // Get direct text content from inner divs (Instagram wraps text in nested divs)
+            const innerDivs = contentEl.querySelectorAll('div > div > div');
+            for (const d of innerDivs) {
+              const t = d.childNodes.length === 1 && d.childNodes[0].nodeType === 3
+                ? d.textContent.trim() : '';
+              if (t) { content = t; break; }
+            }
+            // Fallback: just get all text
+            if (!content) content = contentEl.textContent.trim();
+          }
+
+          // Photos: img or a with photos path
+          msgEl.querySelectorAll('img[src], a[href]').forEach(el => {
+            const src = el.getAttribute('src') || el.getAttribute('href') || '';
+            if (src.includes('/photos/')) {
+              const uri = src.replace(/^\//, '');
               state.zipFiles[uri] = file;
               photos.push({ uri, sender, ts });
               newPhotos.push({ uri, sender, ts, folder, participants });
             }
           });
-          if (el.querySelector('audio')) audioCount++;
-          if (content || el.querySelector('img') || el.querySelector('audio')) {
+
+          if (msgEl.querySelector('audio')) audioCount++;
+
+          if (content || msgEl.querySelector('img[src*="photos"]') || msgEl.querySelector('audio')) {
             messages.push({ sender_name: sender, content, timestamp_ms: ts });
           }
         });
+
         if (!state.myName && participants.length) state.myName = participants[0];
       }
 
