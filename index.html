@@ -748,11 +748,17 @@ async function processZip(file) {
 
   setProgress(38, 'Mapeando conversas...');
 
-  const jsonFiles = Object.keys(zip.files).filter(f =>
+  let msgFiles = Object.keys(zip.files).filter(f =>
     f.includes('/messages/inbox/') && /message_\d+\.json$/.test(f)
   );
+  const isHtml = msgFiles.length === 0;
+  if (isHtml) {
+    msgFiles = Object.keys(zip.files).filter(f =>
+      f.includes('/messages/inbox/') && /message_\d+\.html$/.test(f)
+    );
+  }
 
-  if (!jsonFiles.length) {
+  if (!msgFiles.length) {
     setProgress(0, 'Nenhuma conversa encontrada. Verifique se é um export do Instagram.');
     return;
   }
@@ -764,44 +770,77 @@ async function processZip(file) {
     }
   });
 
-  // Free the zip object — we only needed the file listing and JSONs
-  // (photos will be re-extracted on demand from the original File)
-
   const newConvos = [];
   const newPhotos = [];
 
-  for (let i = 0; i < jsonFiles.length; i++) {
+  for (let i = 0; i < msgFiles.length; i++) {
     if (i % 10 === 0) {
-      setProgress(38 + Math.round((i / jsonFiles.length) * 57),
-        `Conversa ${i + 1} de ${jsonFiles.length}...`);
-      // yield to browser to keep UI responsive
+      setProgress(38 + Math.round((i / msgFiles.length) * 57),
+        `Conversa ${i + 1} de ${msgFiles.length}...`);
       await new Promise(r => setTimeout(r, 0));
     }
     try {
-      const txt = await zip.files[jsonFiles[i]].async('string');
-      const data = JSON.parse(txt);
-      const parts = jsonFiles[i].split('/');
+      const txt = await zip.files[msgFiles[i]].async('string');
+      const parts = msgFiles[i].split('/');
       const folder = parts[parts.length - 2];
-      const participants = (data.participants || []).map(p => p.name || '?');
-      const messages = data.messages || [];
+      let participants = [], messages = [], photos = [], audioCount = 0;
 
-      if (!state.myName && messages.length > 2) {
-        const freq = {};
-        messages.forEach(m => { freq[m.sender_name] = (freq[m.sender_name] || 0) + 1; });
-        state.myName = Object.keys(freq).sort((a, b) => freq[b] - freq[a])[0];
-      }
-
-      const photos = [];
-      let audioCount = 0;
-      for (const msg of messages) {
-        if (msg.photos) {
-          for (const ph of msg.photos) {
-            // Store only uri + metadata — NOT the zip entry itself
-            photos.push({ uri: ph.uri, sender: msg.sender_name, ts: msg.timestamp_ms });
-            newPhotos.push({ uri: ph.uri, sender: msg.sender_name, ts: msg.timestamp_ms, folder, participants });
-          }
+      if (!isHtml) {
+        const data = JSON.parse(txt);
+        participants = (data.participants || []).map(p => p.name || '?');
+        messages = data.messages || [];
+        if (!state.myName && messages.length > 2) {
+          const freq = {};
+          messages.forEach(m => { freq[m.sender_name] = (freq[m.sender_name] || 0) + 1; });
+          state.myName = Object.keys(freq).sort((a, b) => freq[b] - freq[a])[0];
         }
-        if (msg.audio) audioCount++;
+        for (const msg of messages) {
+          if (msg.photos) {
+            for (const ph of msg.photos) {
+              photos.push({ uri: ph.uri, sender: msg.sender_name, ts: msg.timestamp_ms });
+              newPhotos.push({ uri: ph.uri, sender: msg.sender_name, ts: msg.timestamp_ms, folder, participants });
+            }
+          }
+          if (msg.audio) audioCount++;
+        }
+      } else {
+        // HTML format
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(txt, 'text/html');
+        // Participants from header
+        doc.querySelectorAll('._a6-p, .pam._3-95._2ph-._a6-g._a6-p').forEach(el => {
+          const n = el.textContent.trim();
+          if (n && !participants.includes(n)) participants.push(n);
+        });
+        if (!participants.length) {
+          const h = doc.querySelector('h1, ._a705');
+          if (h) participants = h.textContent.split(',').map(s => s.trim()).filter(Boolean);
+        }
+        // Messages
+        const msgEls = doc.querySelectorAll('._a6-g, div[class*="message"]');
+        msgEls.forEach(el => {
+          const senderEl = el.querySelector('._a6-p, .pam._3-95._2ph-._a6-p');
+          const sender = senderEl ? senderEl.textContent.trim() : '?';
+          const contentEl = el.querySelector('._a6-q, .pam._3-95._2ph-._a6-q');
+          const content = contentEl ? contentEl.textContent.trim() : '';
+          const timeEl = el.querySelector('._a72d, ._a6-o');
+          const ts = timeEl ? (new Date(timeEl.textContent.trim()).getTime() || 0) : 0;
+          // Photos inside message
+          el.querySelectorAll('img[src*="photos"], a[href*="photos"]').forEach(imgEl => {
+            const src = imgEl.getAttribute('src') || imgEl.getAttribute('href') || '';
+            let uri = src.replace(/^\//, '');
+            if (uri.includes('photos/')) {
+              state.zipFiles[uri] = file;
+              photos.push({ uri, sender, ts });
+              newPhotos.push({ uri, sender, ts, folder, participants });
+            }
+          });
+          if (el.querySelector('audio')) audioCount++;
+          if (content || el.querySelector('img') || el.querySelector('audio')) {
+            messages.push({ sender_name: sender, content, timestamp_ms: ts });
+          }
+        });
+        if (!state.myName && participants.length) state.myName = participants[0];
       }
 
       newConvos.push({ folder, participants, messages, photos, audioCount });
