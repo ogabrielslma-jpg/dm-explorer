@@ -804,49 +804,53 @@ async function processZip(file) {
           if (msg.audio) audioCount++;
         }
       } else {
-        // HTML format — Instagram export uses these classes:
-        // ._a6-g = message block, h2._a6-i = sender name
-        // ._a6-p > div > div > div > text = message content
-        // ._3-94._a6-o = timestamp
+        // HTML format — exact Instagram export structure:
+        // div.pam._a6-g = message block
+        // h2._a6-i = sender name  
+        // div._a6-p = content container (text in nested divs)
+        // div._a6-o = timestamp
         const parser = new DOMParser();
         const doc = parser.parseFromString(txt, 'text/html');
 
-        // Participants from h1 title area
-        const titleEl = doc.querySelector('._a6-h, h1');
+        // Title / participants from h1
+        const titleEl = doc.querySelector('h1');
         if (titleEl) {
           titleEl.textContent.split(',').map(s => s.trim()).filter(Boolean)
-            .forEach(n => { if (!participants.includes(n)) participants.push(n); });
+            .forEach(n => { if (n && !participants.includes(n)) participants.push(n); });
         }
 
-        doc.querySelectorAll('._a6-g').forEach(msgEl => {
-          // Sender: h2 with class _a6-i
-          const senderEl = msgEl.querySelector('h2._a6-i, ._a6-i');
+        // Each message block
+        doc.querySelectorAll('div._a6-g').forEach(msgEl => {
+          // Sender name
+          const senderEl = msgEl.querySelector('h2');
           const sender = senderEl ? senderEl.textContent.trim() : '?';
 
-          // Timestamp: div with classes _3-94 _a6-o
-          const timeEl = msgEl.querySelector('._a6-o');
+          // Timestamp
+          const timeEl = msgEl.querySelector('div._a6-o');
           const tsText = timeEl ? timeEl.textContent.trim() : '';
-          const ts = tsText ? (new Date(tsText).getTime() || 0) : 0;
+          // Instagram PT-BR format: "fev 27, 2026 2:10 da tarde/noite"
+          const ts = tsText ? parseInstagramDate(tsText) : 0;
 
-          // Content: inside ._a6-p, skip empty divs, get text nodes
-          const contentEl = msgEl.querySelector('._a6-p');
+          // Content — text lives in nested divs inside ._a6-p
+          const contentEl = msgEl.querySelector('div._a6-p');
           let content = '';
           if (contentEl) {
-            // Get direct text content from inner divs (Instagram wraps text in nested divs)
-            const innerDivs = contentEl.querySelectorAll('div > div > div');
-            for (const d of innerDivs) {
-              const t = d.childNodes.length === 1 && d.childNodes[0].nodeType === 3
-                ? d.textContent.trim() : '';
-              if (t) { content = t; break; }
-            }
-            // Fallback: just get all text
-            if (!content) content = contentEl.textContent.trim();
+            // Walk all leaf text nodes
+            const walk = (el) => {
+              if (el.children.length === 0) return el.textContent.trim();
+              for (const child of el.children) {
+                const t = walk(child);
+                if (t) return t;
+              }
+              return '';
+            };
+            content = walk(contentEl);
           }
 
-          // Photos: img or a with photos path
+          // Photos
           msgEl.querySelectorAll('img[src], a[href]').forEach(el => {
             const src = el.getAttribute('src') || el.getAttribute('href') || '';
-            if (src.includes('/photos/')) {
+            if (src.includes('photos/')) {
               const uri = src.replace(/^\//, '');
               state.zipFiles[uri] = file;
               photos.push({ uri, sender, ts });
@@ -856,7 +860,7 @@ async function processZip(file) {
 
           if (msgEl.querySelector('audio')) audioCount++;
 
-          if (content || msgEl.querySelector('img[src*="photos"]') || msgEl.querySelector('audio')) {
+          if (content || msgEl.querySelector('img') || msgEl.querySelector('audio')) {
             messages.push({ sender_name: sender, content, timestamp_ms: ts });
           }
         });
@@ -1124,6 +1128,20 @@ function resetApp() {
 }
 
 // ── HELPERS ──
+// Parse Instagram PT-BR date: "fev 27, 2026 2:10 da tarde/noite"
+function parseInstagramDate(str) {
+  if (!str) return 0;
+  const months = {jan:0,fev:1,mar:2,abr:3,mai:4,jun:5,jul:6,ago:7,set:8,out:9,nov:10,dez:11};
+  const m = str.match(/(\w+)\s+(\d+),\s+(\d+)\s+(\d+):(\d+)\s+(da manhã|da tarde\/noite|da tarde|da noite)?/i);
+  if (!m) return new Date(str).getTime() || 0;
+  const mon = months[m[1].toLowerCase()] ?? 0;
+  let hr = parseInt(m[4]);
+  const min = parseInt(m[5]);
+  const period = (m[6] || '').toLowerCase();
+  if ((period.includes('tarde') || period.includes('noite')) && hr < 12) hr += 12;
+  if (period.includes('manhã') && hr === 12) hr = 0;
+  return new Date(parseInt(m[3]), mon, parseInt(m[2]), hr, min).getTime();
+}
 function esc(s) {
   return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
