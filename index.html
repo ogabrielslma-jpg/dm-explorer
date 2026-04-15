@@ -572,7 +572,8 @@ function lbNav(dir){
 function renderMessages(msgs,filter){
   const wrap=document.getElementById('messages')
   const q=filter.trim().toLowerCase()
-  const list=q?msgs.filter(m=>dec(m.content||'').toLowerCase().includes(q)||dec(m.sender_name||'').toLowerCase().includes(q)):msgs
+  // Always render ALL messages — never filter them out
+  const list=msgs
 
   if(!list.length){wrap.innerHTML='<div class="empty">Nenhuma mensagem encontrada.</div>';hlMatches=[];updateNavBtns();return}
 
