@@ -12,6 +12,7 @@
   --bg:#0a0a0a;--surface:#111;--surface2:#1a1a1a;--border:#2a2a2a;--border2:#333;
   --text:#f0ede8;--muted:#888880;--accent:#e8d5b0;--accent2:#c4a882;
   --me:#1e1e3a;--me-border:#3a3a6a;--me-text:#a0a0e0;
+  --hl:#f7b26a;--hl-bg:rgba(247,178,106,0.28);--hl-active-bg:rgba(247,178,106,0.6);
 }
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Syne',sans-serif}
 ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
@@ -38,7 +39,7 @@ input,button{font-family:inherit}
 .loading-inner{text-align:center;width:300px}
 .loading-title{font-size:16px;font-weight:600;margin-bottom:16px}
 .progress-bar{height:3px;background:var(--border);border-radius:2px;overflow:hidden;margin-bottom:10px}
-.progress-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .15s;width:0%}
+.progress-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .1s;width:0%}
 .loading-count{font-size:12px;color:var(--muted);font-family:'DM Mono',monospace}
 
 /* LIST */
@@ -59,6 +60,7 @@ input,button{font-family:inherit}
 .conv-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
 .conv-time{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace}
 .conv-count{font-size:11px;background:var(--surface2);color:var(--muted);border-radius:20px;padding:2px 8px;font-family:'DM Mono',monospace}
+.conv-has-photos{font-size:10px;color:var(--accent2);margin-top:2px}
 .reset-btn{margin:12px 20px;background:none;border:1px solid var(--border2);border-radius:10px;padding:10px;color:var(--muted);font-size:13px;cursor:pointer;transition:color .15s,border-color .15s;flex-shrink:0}
 .reset-btn:hover{color:var(--text);border-color:var(--accent2)}
 .empty{padding:3rem;text-align:center;color:var(--muted);font-size:14px}
@@ -66,18 +68,33 @@ input,button{font-family:inherit}
 
 /* CHAT */
 #chat-screen{display:none;flex-direction:column;height:100vh;max-width:680px;margin:0 auto;width:100%}
-.chat-header{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border);flex-shrink:0}
+.chat-header{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border);flex-shrink:0}
 .back-btn{background:none;border:1px solid var(--border2);border-radius:8px;color:var(--muted);font-size:16px;width:34px;height:34px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:color .15s}
 .back-btn:hover{color:var(--text)}
 .chat-avatar{width:36px;height:36px;border-radius:50%;border:1.5px solid;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
 .chat-header-info{flex:1;min-width:0}
 .chat-name{font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .chat-sub{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace}
-.chat-search-wrap{padding:10px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0}
-.chat-search-input{flex:1;background:var(--surface);border:1px solid var(--border2);border-radius:8px;padding:8px 12px;font-size:13px;color:var(--text);outline:none;transition:border-color .15s}
+.photos-btn{background:none;border:1px solid var(--border2);border-radius:8px;color:var(--accent2);font-size:12px;padding:5px 10px;cursor:pointer;flex-shrink:0;transition:border-color .15s,color .15s;white-space:nowrap}
+.photos-btn:hover{border-color:var(--accent2);color:var(--accent)}
+
+/* SEARCH BAR WITH NAV */
+.chat-search-wrap{padding:8px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-shrink:0}
+.chat-search-input{flex:1;background:var(--surface);border:1px solid var(--border2);border-radius:8px;padding:7px 12px;font-size:13px;color:var(--text);outline:none;transition:border-color .15s}
 .chat-search-input::placeholder{color:var(--muted)}
 .chat-search-input:focus{border-color:var(--accent2)}
-.chat-search-count{font-size:12px;color:var(--accent);font-family:'DM Mono',monospace;flex-shrink:0}
+.search-nav{display:flex;align-items:center;gap:4px;flex-shrink:0}
+.search-nav-count{font-size:12px;color:var(--accent);font-family:'DM Mono',monospace;min-width:50px;text-align:center}
+.nav-btn{background:none;border:1px solid var(--border2);border-radius:6px;color:var(--muted);font-size:13px;width:28px;height:28px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:color .15s,border-color .15s}
+.nav-btn:hover{color:var(--text);border-color:var(--accent2)}
+.nav-btn:disabled{opacity:.3;cursor:not-allowed}
+
+/* TABS */
+.chat-tabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0}
+.tab{flex:1;padding:10px;text-align:center;font-size:13px;font-weight:600;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;transition:color .15s,border-color .15s}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+
+/* MESSAGES */
 .messages{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:4px}
 .msg-row{display:flex;flex-direction:column;max-width:75%}
 .msg-me{align-self:flex-end;align-items:flex-end}
@@ -89,8 +106,29 @@ input,button{font-family:inherit}
 .bubble-text{flex:1}
 .msg-time{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;flex-shrink:0;opacity:.7;white-space:nowrap}
 .media-tag{font-size:12px;color:var(--muted);font-style:italic}
-.date-divider{text-align:center;font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;margin:8px 0;opacity:.6}
-.highlight{background:rgba(232,213,176,.25);border-radius:3px;padding:0 2px}
+.date-divider{text-align:center;font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;margin:8px 0;opacity:.6;align-self:center}
+mark.hl{background:var(--hl-bg);color:var(--accent);border-radius:3px;padding:0 2px;font-style:normal}
+mark.hl.hl-active{background:var(--hl-active-bg);color:#fff}
+
+/* PHOTOS TAB */
+.photos-grid{flex:1;overflow-y:auto;padding:12px;display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.photo-item{position:relative;aspect-ratio:1;border-radius:8px;overflow:hidden;background:var(--surface2);cursor:pointer}
+.photo-item img{width:100%;height:100%;object-fit:cover;display:block;transition:opacity .2s}
+.photo-item:hover img{opacity:.8}
+.photo-date{position:absolute;bottom:0;left:0;right:0;font-size:10px;font-family:'DM Mono',monospace;color:#fff;background:rgba(0,0,0,.6);padding:3px 6px;text-align:center}
+.photo-sender{position:absolute;top:4px;left:4px;font-size:9px;background:rgba(0,0,0,.7);color:#fff;padding:2px 5px;border-radius:4px;font-family:'DM Mono',monospace}
+.no-photos{padding:3rem;text-align:center;color:var(--muted);font-size:14px;grid-column:1/-1}
+
+/* LIGHTBOX */
+#lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:999;flex-direction:column;align-items:center;justify-content:center;gap:12px}
+#lightbox.open{display:flex}
+#lightbox img{max-width:90vw;max-height:80vh;object-fit:contain;border-radius:8px}
+.lb-close{position:absolute;top:16px;right:20px;background:none;border:none;color:#fff;font-size:28px;cursor:pointer;opacity:.7}
+.lb-close:hover{opacity:1}
+.lb-info{font-size:13px;color:rgba(255,255,255,.6);font-family:'DM Mono',monospace;text-align:center}
+.lb-nav{display:flex;gap:16px;align-items:center}
+.lb-nav-btn{background:none;border:1px solid rgba(255,255,255,.2);border-radius:8px;color:#fff;font-size:16px;width:38px;height:38px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.lb-nav-btn:hover{border-color:rgba(255,255,255,.5)}
 </style>
 </head>
 <body>
@@ -110,7 +148,7 @@ input,button{font-family:inherit}
       <button class="upload-btn" onclick="document.getElementById('files-input').click()">📄 Selecionar arquivos JSON</button>
     </div>
   </div>
-  <input type="file" id="folder-input" webkitdirectory multiple accept=".json" style="display:none">
+  <input type="file" id="folder-input" webkitdirectory multiple style="display:none">
   <input type="file" id="files-input" multiple accept=".json" style="display:none">
   <div class="upload-note">🔒 Tudo roda no navegador — nenhum dado é enviado a servidores.</div>
 </div>
@@ -149,36 +187,71 @@ input,button{font-family:inherit}
   </div>
   <div class="chat-search-wrap">
     <input class="chat-search-input" id="chat-search" placeholder="Buscar nesta conversa…" autocomplete="off">
-    <span class="chat-search-count" id="chat-search-count"></span>
+    <div class="search-nav">
+      <span class="search-nav-count" id="search-nav-count"></span>
+      <button class="nav-btn" id="nav-up" onclick="navigateHL(-1)" title="Anterior">↑</button>
+      <button class="nav-btn" id="nav-down" onclick="navigateHL(1)" title="Próximo">↓</button>
+    </div>
+  </div>
+  <div class="chat-tabs">
+    <div class="tab active" id="tab-msgs" onclick="switchTab('msgs')">💬 Mensagens</div>
+    <div class="tab" id="tab-photos" onclick="switchTab('photos')">📷 Fotos</div>
   </div>
   <div class="messages" id="messages"></div>
+  <div class="photos-grid" id="photos-grid" style="display:none"></div>
+</div>
+
+<!-- LIGHTBOX -->
+<div id="lightbox">
+  <button class="lb-close" onclick="closeLightbox()">×</button>
+  <img id="lb-img" src="" alt="">
+  <div class="lb-info" id="lb-info"></div>
+  <div class="lb-nav">
+    <button class="lb-nav-btn" onclick="lbNav(-1)">←</button>
+    <button class="lb-nav-btn" onclick="lbNav(1)">→</button>
+  </div>
 </div>
 
 <script>
 const COLORS=['#7c6af7','#f76a8c','#6ab8f7','#f7b26a','#6af7b2','#f76af7','#a0f76a','#f76a6a']
-let conversations=[], myName='', activeConv=null
+let conversations=[], myName='', activeConv=null, filteredList=[]
+let hlMatches=[], hlIndex=-1
+let lbPhotos=[], lbCurrent=0
+let currentTab='msgs'
+// Store file objects for photo reading
+let allFileObjects=[]
 
 function dec(s){if(!s)return '';try{return decodeURIComponent(escape(s))}catch{return s}}
 function fmtTs(ms){if(!ms)return '';const d=new Date(ms);return d.toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'})}
 function fmtDate(ms){if(!ms)return '';const d=new Date(ms);return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'})}
 function initials(n){return(n||'??').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2)}
 function colorFor(n){let h=0;for(let i=0;i<(n||'').length;i++)h=(h*31+n.charCodeAt(i))%COLORS.length;return COLORS[h]}
-function show(id){['upload-screen','loading-screen','list-screen','chat-screen'].forEach(s=>{const el=document.getElementById(s);el.style.display=s===id?(s==='list-screen'||s==='chat-screen'?'flex':'flex'):'none'})}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+
+function show(id){
+  ['upload-screen','loading-screen','list-screen','chat-screen'].forEach(s=>{
+    const el=document.getElementById(s)
+    if(s===id){el.style.display=(s==='list-screen'||s==='chat-screen')?'flex':'flex'}
+    else{el.style.display='none'}
+  })
+}
 
 async function handleFiles(fileList){
-  const files=Array.from(fileList).filter(f=>f.name.endsWith('.json')&&!['secret_conversations.json','your_chat_information.json'].includes(f.name))
-  if(!files.length){alert('Nenhum arquivo JSON encontrado.');return}
+  const files=Array.from(fileList)
+  allFileObjects=files // save all for photo lookup
+  const jsonFiles=files.filter(f=>f.name.endsWith('.json')&&!['secret_conversations.json','your_chat_information.json'].includes(f.name))
+  if(!jsonFiles.length){alert('Nenhum arquivo JSON encontrado.');return}
   show('loading-screen')
-  
+
   const byFolder={}
-  for(const f of files){
+  for(const f of jsonFiles){
     const parts=(f.webkitRelativePath||f.name).split('/')
     const key=parts.length>=2?parts[parts.length-2]:'root'
     if(!byFolder[key])byFolder[key]=[]
     byFolder[key].push(f)
   }
 
-  const total=files.length
+  const total=jsonFiles.length
   let done=0
   const convList=[]
 
@@ -197,7 +270,12 @@ async function handleFiles(fileList){
       if(p.participants&&!participants.length)participants=p.participants.map(x=>dec(x.name))
     })
     msgs.sort((a,b)=>a.timestamp_ms-b.timestamp_ms)
-    convList.push({folderName:folder,title:title||folder,participants,messages:msgs,msgCount:msgs.length})
+
+    // Count photos in messages
+    let photoCount=0
+    msgs.forEach(m=>{if(m.photos?.length)photoCount+=m.photos.length})
+
+    convList.push({folderName:folder,title:title||folder,participants,messages:msgs,msgCount:msgs.length,photoCount})
   }
 
   convList.sort((a,b)=>{
@@ -206,12 +284,12 @@ async function handleFiles(fileList){
     return lB-lA
   })
 
-  // guess my name
   const sc={}
   convList.forEach(c=>c.messages.forEach(m=>{const s=dec(m.sender_name||'');sc[s]=(sc[s]||0)+1}))
   myName=Object.entries(sc).sort((a,b)=>b[1]-a[1])[0]?.[0]||''
 
   conversations=convList
+  filteredList=convList
   renderList(convList)
   show('list-screen')
   document.getElementById('list-meta').textContent=`${convList.length} conversas · ${myName}`
@@ -219,35 +297,32 @@ async function handleFiles(fileList){
 }
 
 function renderList(list){
+  filteredList=list
   const el=document.getElementById('conv-list')
   if(!list.length){el.innerHTML='<div class="empty">Nenhuma conversa encontrada.</div>';return}
-  el.innerHTML=list.map((c,i)=>{
+  el.innerHTML=''
+  list.forEach((c,i)=>{
     const color=colorFor(c.title)
     const last=c.messages[c.messages.length-1]
     const lastTxt=getLastMsg(c)
     const time=last?fmtTs(last.timestamp_ms).split(' ')[0]:''
-    return `<div class="conv-item" onclick="openConv(${i}_list_idx)">
+    const div=document.createElement('div')
+    div.className='conv-item'
+    div.innerHTML=`
       <div class="conv-avatar" style="background:${color}22;color:${color};border-color:${color}44">${initials(c.title)}</div>
       <div class="conv-info">
         <div class="conv-name">${esc(c.title)}</div>
         <div class="conv-last">${esc(lastTxt)}</div>
-        <span class="folder-badge">${esc(c.folderName)}</span>
+        ${c.photoCount>0?`<span class="conv-has-photos">📷 ${c.photoCount} foto${c.photoCount!==1?'s':''}</span>`:''}
       </div>
       <div class="conv-right">
         <div class="conv-time">${time}</div>
         <div class="conv-count">${c.msgCount}</div>
-      </div>
-    </div>`
-  }).join('').replace(/_list_idx/g,'').replace(/onclick="openConv\((\d+)\)"/g,(_,i)=>`onclick="openConvByIndex(${i})"`)
-  // fix indices
-  el.querySelectorAll('.conv-item').forEach((el,i)=>el.onclick=()=>openConvByIndex(i))
+      </div>`
+    div.onclick=()=>openConv(c)
+    el.appendChild(div)
+  })
 }
-
-// maintain filtered list reference
-let filteredList=[]
-function renderListFromFiltered(list){filteredList=list;renderList(list)}
-
-function openConvByIndex(i){openConv(filteredList[i]||conversations[i])}
 
 function getLastMsg(c){
   const m=c.messages[c.messages.length-1]
@@ -261,37 +336,135 @@ function getLastMsg(c){
   return '📎 Mídia'
 }
 
-function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
-
 function openConv(conv){
   activeConv=conv
+  currentTab='msgs'
   const color=colorFor(conv.title)
-  document.getElementById('chat-avatar').textContent=initials(conv.title)
-  document.getElementById('chat-avatar').style.cssText=`width:36px;height:36px;border-radius:50%;border:1.5px solid ${color}44;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;background:${color}22;color:${color}`
+  const av=document.getElementById('chat-avatar')
+  av.textContent=initials(conv.title)
+  av.style.cssText=`width:36px;height:36px;border-radius:50%;border:1.5px solid ${color}44;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;background:${color}22;color:${color}`
   document.getElementById('chat-title').textContent=conv.title
-  document.getElementById('chat-sub').textContent=`${conv.msgCount} mensagens · ${conv.folderName}`
+  document.getElementById('chat-sub').textContent=`${conv.msgCount} msg${conv.photoCount>0?' · 📷 '+conv.photoCount+' fotos':''}`
   document.getElementById('chat-search').value=''
-  document.getElementById('chat-search-count').textContent=''
-  renderMessages(conv.messages,'')
+  document.getElementById('search-nav-count').textContent=''
+  document.getElementById('nav-up').disabled=true
+  document.getElementById('nav-down').disabled=true
+  hlMatches=[]
+  hlIndex=-1
+  switchTab('msgs')
   show('chat-screen')
-  setTimeout(()=>{const m=document.getElementById('messages');m.scrollTop=m.scrollHeight},50)
+  renderMessages(conv.messages,'')
+}
+
+function switchTab(tab){
+  currentTab=tab
+  document.getElementById('tab-msgs').className='tab'+(tab==='msgs'?' active':'')
+  document.getElementById('tab-photos').className='tab'+(tab==='photos'?' active':'')
+  document.getElementById('messages').style.display=tab==='msgs'?'flex':'none'
+  document.getElementById('photos-grid').style.display=tab==='photos'?'grid':'none'
+  document.getElementById('chat-search-wrap'||'.chat-search-wrap').style.display=tab==='msgs'?'flex':'none'
+  if(tab==='photos')renderPhotos()
+}
+
+// Fix switchTab for search wrap
+function switchTab(tab){
+  currentTab=tab
+  document.getElementById('tab-msgs').className='tab'+(tab==='msgs'?' active':'')
+  document.getElementById('tab-photos').className='tab'+(tab==='photos'?' active':'')
+  document.getElementById('messages').style.display=tab==='msgs'?'flex':'none'
+  document.getElementById('photos-grid').style.display=tab==='photos'?'grid':'none'
+  const sw=document.querySelector('.chat-search-wrap')
+  if(sw)sw.style.display=tab==='msgs'?'flex':'none'
+  if(tab==='photos'&&activeConv)renderPhotos()
+}
+
+async function renderPhotos(){
+  const grid=document.getElementById('photos-grid')
+  grid.innerHTML='<div class="no-photos" style="grid-column:1/-1;color:var(--muted);font-size:13px;padding:2rem;text-align:center">Carregando fotos…</div>'
+  
+  if(!activeConv){grid.innerHTML='<div class="no-photos">Nenhuma conversa ativa.</div>';return}
+
+  // Collect all photo references from messages
+  const photoMsgs=[]
+  activeConv.messages.forEach(m=>{
+    if(m.photos?.length){
+      m.photos.forEach(p=>{
+        photoMsgs.push({uri:p.uri,creation_timestamp:p.creation_timestamp||m.timestamp_ms,sender:dec(m.sender_name||''),ts:m.timestamp_ms})
+      })
+    }
+  })
+
+  if(!photoMsgs.length){
+    grid.innerHTML='<div class="no-photos">Nenhuma foto nesta conversa.</div>'
+    return
+  }
+
+  // Try to match photo files from uploaded files
+  grid.innerHTML=''
+  lbPhotos=[]
+
+  for(const photo of photoMsgs){
+    // uri looks like: messages/inbox/username/photos/image.jpg
+    const uriParts=photo.uri.split('/')
+    const fileName=uriParts[uriParts.length-1]
+    
+    // Find matching file in uploaded files
+    const match=allFileObjects.find(f=>{
+      const fp=f.webkitRelativePath||f.name
+      return fp.endsWith(fileName)||f.name===fileName
+    })
+
+    const item=document.createElement('div')
+    item.className='photo-item'
+    const idx=lbPhotos.length
+
+    if(match){
+      const url=URL.createObjectURL(match)
+      lbPhotos.push({url,sender:photo.sender,ts:photo.ts,name:fileName})
+      item.innerHTML=`<img src="${url}" loading="lazy" alt="foto"><div class="photo-sender">${esc(photo.sender)}</div><div class="photo-date">${fmtDate(photo.ts)}</div>`
+      item.onclick=()=>openLightbox(idx)
+    } else {
+      // Show placeholder with filename
+      lbPhotos.push({url:null,sender:photo.sender,ts:photo.ts,name:fileName})
+      item.innerHTML=`<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:4px;padding:8px"><div style="font-size:24px;opacity:.3">📷</div><div style="font-size:9px;color:var(--muted);text-align:center;font-family:'DM Mono',monospace;word-break:break-all">${esc(fileName)}</div><div style="font-size:9px;color:var(--muted)">${fmtDate(photo.ts)}</div></div>`
+      item.style.cursor='default'
+    }
+    grid.appendChild(item)
+  }
+
+  if(!lbPhotos.length)grid.innerHTML='<div class="no-photos">Nenhuma foto encontrada.</div>'
+}
+
+function openLightbox(idx){
+  lbCurrent=idx
+  const p=lbPhotos[idx]
+  if(!p||!p.url)return
+  document.getElementById('lb-img').src=p.url
+  document.getElementById('lb-info').textContent=`${p.sender} · ${fmtTs(p.ts)} · ${p.name}`
+  document.getElementById('lightbox').classList.add('open')
+}
+function closeLightbox(){document.getElementById('lightbox').classList.remove('open')}
+function lbNav(dir){
+  let next=lbCurrent+dir
+  while(next>=0&&next<lbPhotos.length&&!lbPhotos[next].url)next+=dir
+  if(next>=0&&next<lbPhotos.length)openLightbox(next)
 }
 
 function renderMessages(msgs, filter){
   const wrap=document.getElementById('messages')
-  const q=filter.toLowerCase()
+  const q=filter.trim().toLowerCase()
   const list=q?msgs.filter(m=>dec(m.content||'').toLowerCase().includes(q)||dec(m.sender_name||'').toLowerCase().includes(q)):msgs
-  
-  if(!list.length){wrap.innerHTML='<div class="empty">Nenhuma mensagem encontrada.</div>';return}
+
+  if(!list.length){wrap.innerHTML='<div class="empty">Nenhuma mensagem encontrada.</div>';hlMatches=[];updateNavBtns();return}
 
   let html='', prevDate='', prevSender=''
-  list.forEach((m,i)=>{
+  list.forEach((m)=>{
     const sender=dec(m.sender_name||'')
     const isMe=sender===myName
     const side=isMe?'msg-me':'msg-them'
     const time=fmtTs(m.timestamp_ms)
     const date=fmtDate(m.timestamp_ms)
-    
+
     if(date!==prevDate){
       html+=`<div class="date-divider">${date}</div>`
       prevDate=date
@@ -300,12 +473,16 @@ function renderMessages(msgs, filter){
     let txt=dec(m.content||'')
     let contentHtml=''
     if(txt){
-      if(q){txt=txt.replace(new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'),'<mark class="highlight">$1</mark>')}
-      contentHtml=`<span class="bubble-text">${esc(txt).replace(/&lt;mark class=&quot;highlight&quot;&gt;/g,'<mark class="highlight">').replace(/&lt;\/mark&gt;/g,'</mark>')}</span>`
+      let escaped=esc(txt)
+      if(q){
+        const re=new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi')
+        escaped=escaped.replace(re,'<mark class="hl">$1</mark>')
+      }
+      contentHtml=`<span class="bubble-text">${escaped}</span>`
     } else if(m.photos?.length){contentHtml='<span class="media-tag">📷 Foto</span>'}
     else if(m.audio_files?.length){contentHtml='<span class="media-tag">🎤 Áudio</span>'}
     else if(m.videos?.length){contentHtml='<span class="media-tag">🎥 Vídeo</span>'}
-    else if(m.share?.link){contentHtml=`<span class="media-tag">🔗 ${esc(m.share.link).slice(0,50)}</span>`}
+    else if(m.share?.link){contentHtml=`<span class="media-tag">🔗 ${esc((m.share.link||'').slice(0,50))}</span>`}
     else{contentHtml='<span class="media-tag">📎 Mídia</span>'}
 
     const showSender=!isMe&&sender!==prevSender
@@ -316,45 +493,76 @@ function renderMessages(msgs, filter){
     prevSender=sender
   })
   wrap.innerHTML=html
-  
-  if(q){
-    const cnt=document.getElementById('chat-search-count')
-    cnt.textContent=`${list.length} resultado${list.length!==1?'s':''}`
-    const first=wrap.querySelector('.highlight')
-    if(first)first.scrollIntoView({block:'center'})
+
+  // Build highlight index
+  hlMatches=Array.from(wrap.querySelectorAll('mark.hl'))
+  hlIndex=hlMatches.length>0?0:-1
+  updateNavBtns()
+
+  if(q&&hlMatches.length>0){
+    activateHL(0)
   } else {
     wrap.scrollTop=wrap.scrollHeight
+    document.getElementById('search-nav-count').textContent=''
   }
+}
+
+function activateHL(i){
+  hlMatches.forEach(m=>m.classList.remove('hl-active'))
+  if(i<0||i>=hlMatches.length)return
+  hlIndex=i
+  hlMatches[i].classList.add('hl-active')
+  hlMatches[i].scrollIntoView({block:'center',behavior:'smooth'})
+  document.getElementById('search-nav-count').textContent=`${i+1}/${hlMatches.length}`
+  updateNavBtns()
+}
+
+function navigateHL(dir){
+  if(!hlMatches.length)return
+  let next=hlIndex+dir
+  if(next<0)next=hlMatches.length-1
+  if(next>=hlMatches.length)next=0
+  activateHL(next)
+}
+
+function updateNavBtns(){
+  const hasHL=hlMatches.length>0
+  document.getElementById('nav-up').disabled=!hasHL
+  document.getElementById('nav-down').disabled=!hasHL
+  if(!hasHL)document.getElementById('search-nav-count').textContent=''
 }
 
 function showList(){show('list-screen')}
 
 function resetApp(){
-  conversations=[]
-  filteredList=[]
-  activeConv=null
+  conversations=[];filteredList=[];activeConv=null
+  allFileObjects=[];lbPhotos=[]
   document.getElementById('search-input').value=''
   document.getElementById('conv-list').innerHTML=''
   show('upload-screen')
 }
 
-// Search list
+// List search
 document.getElementById('search-input').addEventListener('input',function(){
   const q=this.value.toLowerCase()
-  if(!q){renderListFromFiltered(conversations);return}
+  if(!q){renderList(conversations);document.getElementById('list-meta').textContent=`${conversations.length} conversas · ${myName}`;return}
   const f=conversations.filter(c=>
     c.title.toLowerCase().includes(q)||
     c.folderName.toLowerCase().includes(q)||
     c.participants.some(p=>p.toLowerCase().includes(q))||
     c.messages.some(m=>dec(m.content||'').toLowerCase().includes(q))
   )
-  renderListFromFiltered(f)
+  renderList(f)
   document.getElementById('list-meta').textContent=`${f.length} de ${conversations.length} conversas`
 })
 
-// Search chat
+// Chat search with debounce
+let chatSearchTimer=null
 document.getElementById('chat-search').addEventListener('input',function(){
-  if(activeConv)renderMessages(activeConv.messages,this.value)
+  clearTimeout(chatSearchTimer)
+  chatSearchTimer=setTimeout(()=>{
+    if(activeConv)renderMessages(activeConv.messages,this.value)
+  },200)
 })
 
 // Drop zone
@@ -362,12 +570,23 @@ const dz=document.getElementById('drop-zone')
 dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('drag-over')})
 dz.addEventListener('dragleave',()=>dz.classList.remove('drag-over'))
 dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('drag-over');if(e.dataTransfer.files.length)handleFiles(e.dataTransfer.files)})
-
 document.getElementById('folder-input').addEventListener('change',e=>handleFiles(e.target.files))
 document.getElementById('files-input').addEventListener('change',e=>handleFiles(e.target.files))
 
-// Init
-filteredList=conversations
+// Keyboard nav
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape')closeLightbox()
+  if(document.getElementById('lightbox').classList.contains('open')){
+    if(e.key==='ArrowLeft')lbNav(-1)
+    if(e.key==='ArrowRight')lbNav(1)
+  }
+  if(document.getElementById('chat-screen').style.display==='flex'&&currentTab==='msgs'){
+    if(e.key==='Enter'&&document.getElementById('chat-search')===document.activeElement){
+      navigateHL(e.shiftKey?-1:1)
+    }
+  }
+})
+
 show('upload-screen')
 </script>
 </body>
