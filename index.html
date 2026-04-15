@@ -12,7 +12,7 @@
   --bg:#0a0a0a;--surface:#111;--surface2:#1a1a1a;--border:#2a2a2a;--border2:#333;
   --text:#f0ede8;--muted:#888880;--accent:#e8d5b0;--accent2:#c4a882;
   --me:#1e1e3a;--me-border:#3a3a6a;--me-text:#a0a0e0;
-  --hl:#f7b26a;--hl-bg:rgba(247,178,106,0.28);--hl-active-bg:rgba(247,178,106,0.6);
+  --hl-bg:rgba(247,178,106,0.28);--hl-active-bg:rgba(247,178,106,0.65);
 }
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Syne',sans-serif}
 ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
@@ -29,14 +29,14 @@ input,button{font-family:inherit}
 .drop-title{font-size:16px;font-weight:600;margin-bottom:6px}
 .drop-title code{background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:2px 6px;font-family:'DM Mono',monospace;font-size:13px;color:var(--accent)}
 .drop-sub{font-size:13px;color:var(--muted);margin-bottom:16px}
-.upload-note{font-size:12px;color:var(--muted);opacity:.6}
+.upload-note{font-size:12px;color:var(--muted);opacity:.6;text-align:center;max-width:420px}
 .btn-group{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:8px}
 .upload-btn{background:none;border:1px solid var(--border2);border-radius:10px;padding:9px 18px;color:var(--muted);font-size:13px;cursor:pointer;transition:color .15s,border-color .15s}
 .upload-btn:hover{color:var(--text);border-color:var(--accent2)}
 
 /* LOADING */
-#loading-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;display:none}
-.loading-inner{text-align:center;width:300px}
+#loading-screen{min-height:100vh;display:none;align-items:center;justify-content:center}
+.loading-inner{text-align:center;width:320px}
 .loading-title{font-size:16px;font-weight:600;margin-bottom:16px}
 .progress-bar{height:3px;background:var(--border);border-radius:2px;overflow:hidden;margin-bottom:10px}
 .progress-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .1s;width:0%}
@@ -50,21 +50,24 @@ input,button{font-family:inherit}
 .search-input{width:100%;background:var(--surface);border:1px solid var(--border2);border-radius:10px;padding:10px 14px;font-size:14px;color:var(--text);outline:none;transition:border-color .15s}
 .search-input::placeholder{color:var(--muted)}
 .search-input:focus{border-color:var(--accent2)}
-.conv-list{flex:1;overflow-y:auto;padding:8px 0}
+.conv-list{flex:1;overflow-y:auto}
 .conv-item{display:flex;align-items:center;gap:12px;padding:12px 20px;cursor:pointer;transition:background .1s;border-bottom:1px solid var(--border)}
 .conv-item:hover{background:var(--surface)}
-.conv-avatar{width:44px;height:44px;border-radius:50%;border:1.5px solid;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0;letter-spacing:-0.5px}
+.conv-avatar{width:44px;height:44px;border-radius:50%;border:1.5px solid;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0}
 .conv-info{flex:1;min-width:0}
 .conv-name{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .conv-last{font-size:12px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.conv-media-badges{display:flex;gap:4px;margin-top:3px;flex-wrap:wrap}
+.badge{font-size:10px;padding:1px 6px;border-radius:4px;font-family:'DM Mono',monospace}
+.badge-photo{background:#1a2a1a;color:#6af7b2}
+.badge-video{background:#1a1a2a;color:#6ab8f7}
+.badge-audio{background:#2a1a1a;color:#f7b26a}
 .conv-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
 .conv-time{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace}
 .conv-count{font-size:11px;background:var(--surface2);color:var(--muted);border-radius:20px;padding:2px 8px;font-family:'DM Mono',monospace}
-.conv-has-photos{font-size:10px;color:var(--accent2);margin-top:2px}
 .reset-btn{margin:12px 20px;background:none;border:1px solid var(--border2);border-radius:10px;padding:10px;color:var(--muted);font-size:13px;cursor:pointer;transition:color .15s,border-color .15s;flex-shrink:0}
 .reset-btn:hover{color:var(--text);border-color:var(--accent2)}
 .empty{padding:3rem;text-align:center;color:var(--muted);font-size:14px}
-.folder-badge{font-size:10px;font-family:'DM Mono',monospace;background:var(--surface2);color:var(--muted);padding:2px 6px;border-radius:4px;margin-top:2px;display:inline-block}
 
 /* CHAT */
 #chat-screen{display:none;flex-direction:column;height:100vh;max-width:680px;margin:0 auto;width:100%}
@@ -75,18 +78,16 @@ input,button{font-family:inherit}
 .chat-header-info{flex:1;min-width:0}
 .chat-name{font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .chat-sub{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace}
-.photos-btn{background:none;border:1px solid var(--border2);border-radius:8px;color:var(--accent2);font-size:12px;padding:5px 10px;cursor:pointer;flex-shrink:0;transition:border-color .15s,color .15s;white-space:nowrap}
-.photos-btn:hover{border-color:var(--accent2);color:var(--accent)}
 
-/* SEARCH BAR WITH NAV */
+/* SEARCH BAR */
 .chat-search-wrap{padding:8px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-shrink:0}
 .chat-search-input{flex:1;background:var(--surface);border:1px solid var(--border2);border-radius:8px;padding:7px 12px;font-size:13px;color:var(--text);outline:none;transition:border-color .15s}
 .chat-search-input::placeholder{color:var(--muted)}
 .chat-search-input:focus{border-color:var(--accent2)}
 .search-nav{display:flex;align-items:center;gap:4px;flex-shrink:0}
-.search-nav-count{font-size:12px;color:var(--accent);font-family:'DM Mono',monospace;min-width:50px;text-align:center}
+.search-nav-count{font-size:12px;color:var(--accent);font-family:'DM Mono',monospace;min-width:52px;text-align:center}
 .nav-btn{background:none;border:1px solid var(--border2);border-radius:6px;color:var(--muted);font-size:13px;width:28px;height:28px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:color .15s,border-color .15s}
-.nav-btn:hover{color:var(--text);border-color:var(--accent2)}
+.nav-btn:hover:not(:disabled){color:var(--text);border-color:var(--accent2)}
 .nav-btn:disabled{opacity:.3;cursor:not-allowed}
 
 /* TABS */
@@ -110,25 +111,37 @@ input,button{font-family:inherit}
 mark.hl{background:var(--hl-bg);color:var(--accent);border-radius:3px;padding:0 2px;font-style:normal}
 mark.hl.hl-active{background:var(--hl-active-bg);color:#fff}
 
-/* PHOTOS TAB */
-.photos-grid{flex:1;overflow-y:auto;padding:12px;display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
-.photo-item{position:relative;aspect-ratio:1;border-radius:8px;overflow:hidden;background:var(--surface2);cursor:pointer}
-.photo-item img{width:100%;height:100%;object-fit:cover;display:block;transition:opacity .2s}
-.photo-item:hover img{opacity:.8}
-.photo-date{position:absolute;bottom:0;left:0;right:0;font-size:10px;font-family:'DM Mono',monospace;color:#fff;background:rgba(0,0,0,.6);padding:3px 6px;text-align:center}
-.photo-sender{position:absolute;top:4px;left:4px;font-size:9px;background:rgba(0,0,0,.7);color:#fff;padding:2px 5px;border-radius:4px;font-family:'DM Mono',monospace}
-.no-photos{padding:3rem;text-align:center;color:var(--muted);font-size:14px;grid-column:1/-1}
+/* MEDIA GRID */
+.media-area{flex:1;overflow-y:auto;display:none;flex-direction:column}
+.media-filter-bar{display:flex;gap:8px;padding:10px 14px;border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap}
+.filter-btn{background:none;border:1px solid var(--border2);border-radius:20px;padding:4px 12px;font-size:12px;color:var(--muted);cursor:pointer;transition:all .15s;font-family:'DM Mono',monospace}
+.filter-btn.active{color:var(--text);border-color:var(--accent2);background:var(--surface2)}
+.media-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:12px;flex:1;align-content:start}
+.media-item{position:relative;aspect-ratio:1;border-radius:8px;overflow:hidden;background:var(--surface2);cursor:pointer}
+.media-item img{width:100%;height:100%;object-fit:cover;display:block;transition:opacity .2s}
+.media-item:hover img{opacity:.8}
+.media-item video{width:100%;height:100%;object-fit:cover;display:block}
+.media-overlay{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:space-between;padding:4px 6px;pointer-events:none}
+.media-sender{font-size:9px;background:rgba(0,0,0,.7);color:#fff;padding:2px 5px;border-radius:4px;font-family:'DM Mono',monospace;align-self:flex-start}
+.media-date{font-size:9px;background:rgba(0,0,0,.7);color:#fff;padding:2px 5px;border-radius:4px;font-family:'DM Mono',monospace;align-self:flex-end}
+.media-type-icon{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:28px;opacity:.8;pointer-events:none}
+.audio-item{aspect-ratio:unset;min-height:60px;display:flex;flex-direction:column;justify-content:center;gap:4px;padding:10px 12px;background:var(--surface2);border-radius:8px;cursor:default}
+.audio-item audio{width:100%;height:32px;outline:none;filter:invert(1) hue-rotate(180deg) brightness(.8)}
+.audio-meta{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace}
+.no-media{padding:3rem;text-align:center;color:var(--muted);font-size:14px;grid-column:1/-1}
 
 /* LIGHTBOX */
-#lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:999;flex-direction:column;align-items:center;justify-content:center;gap:12px}
+#lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.96);z-index:999;flex-direction:column;align-items:center;justify-content:center;gap:12px}
 #lightbox.open{display:flex}
-#lightbox img{max-width:90vw;max-height:80vh;object-fit:contain;border-radius:8px}
-.lb-close{position:absolute;top:16px;right:20px;background:none;border:none;color:#fff;font-size:28px;cursor:pointer;opacity:.7}
+#lb-img{max-width:90vw;max-height:78vh;object-fit:contain;border-radius:8px;display:none}
+#lb-vid{max-width:90vw;max-height:78vh;border-radius:8px;display:none;outline:none}
+.lb-close{position:absolute;top:16px;right:20px;background:none;border:none;color:#fff;font-size:28px;cursor:pointer;opacity:.7;line-height:1}
 .lb-close:hover{opacity:1}
-.lb-info{font-size:13px;color:rgba(255,255,255,.6);font-family:'DM Mono',monospace;text-align:center}
+.lb-info{font-size:12px;color:rgba(255,255,255,.5);font-family:'DM Mono',monospace;text-align:center;max-width:80vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .lb-nav{display:flex;gap:16px;align-items:center}
-.lb-nav-btn{background:none;border:1px solid rgba(255,255,255,.2);border-radius:8px;color:#fff;font-size:16px;width:38px;height:38px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.lb-nav-btn{background:none;border:1px solid rgba(255,255,255,.2);border-radius:8px;color:#fff;font-size:16px;width:38px;height:38px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:border-color .15s}
 .lb-nav-btn:hover{border-color:rgba(255,255,255,.5)}
+.lb-counter{font-size:12px;color:rgba(255,255,255,.4);font-family:'DM Mono',monospace;min-width:60px;text-align:center}
 </style>
 </head>
 <body>
@@ -141,22 +154,22 @@ mark.hl.hl-active{background:var(--hl-active-bg);color:#fff}
   </div>
   <div class="drop-zone" id="drop-zone">
     <div class="drop-icon">⬆</div>
-    <div class="drop-title">Solte a pasta <code>inbox</code> ou <code>message_requests</code> aqui</div>
-    <div class="drop-sub">Ou use os botões abaixo para selecionar</div>
+    <div class="drop-title">Solte a pasta <code>inbox</code> aqui</div>
+    <div class="drop-sub">Para ver fotos e vídeos, inclua as subpastas de mídia também</div>
     <div class="btn-group">
-      <button class="upload-btn" onclick="document.getElementById('folder-input').click()">📁 Selecionar pasta</button>
-      <button class="upload-btn" onclick="document.getElementById('files-input').click()">📄 Selecionar arquivos JSON</button>
+      <button class="upload-btn" onclick="document.getElementById('folder-input').click()">📁 Selecionar pasta inteira</button>
+      <button class="upload-btn" onclick="document.getElementById('files-input').click()">📄 Só os JSONs</button>
     </div>
   </div>
   <input type="file" id="folder-input" webkitdirectory multiple style="display:none">
   <input type="file" id="files-input" multiple accept=".json" style="display:none">
-  <div class="upload-note">🔒 Tudo roda no navegador — nenhum dado é enviado a servidores.</div>
+  <div class="upload-note">🔒 Tudo roda no seu navegador. Nenhum dado é enviado a servidores.<br>Para ver as fotos e vídeos, selecione a pasta <strong>inbox</strong> inteira (não só os JSONs).</div>
 </div>
 
 <!-- LOADING -->
 <div id="loading-screen">
   <div class="loading-inner">
-    <div class="loading-title">Carregando conversas…</div>
+    <div class="loading-title">Carregando…</div>
     <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
     <div class="loading-count" id="loading-count">0 / 0 arquivos</div>
   </div>
@@ -185,29 +198,38 @@ mark.hl.hl-active{background:var(--hl-active-bg);color:#fff}
       <div class="chat-sub" id="chat-sub"></div>
     </div>
   </div>
-  <div class="chat-search-wrap">
+
+  <div class="chat-search-wrap" id="chat-search-wrap">
     <input class="chat-search-input" id="chat-search" placeholder="Buscar nesta conversa…" autocomplete="off">
     <div class="search-nav">
       <span class="search-nav-count" id="search-nav-count"></span>
-      <button class="nav-btn" id="nav-up" onclick="navigateHL(-1)" title="Anterior">↑</button>
-      <button class="nav-btn" id="nav-down" onclick="navigateHL(1)" title="Próximo">↓</button>
+      <button class="nav-btn" id="nav-up" onclick="navigateHL(-1)" title="Anterior (↑)">↑</button>
+      <button class="nav-btn" id="nav-down" onclick="navigateHL(1)" title="Próximo (↓)">↓</button>
     </div>
   </div>
-  <div class="chat-tabs">
+
+  <div class="chat-tabs" id="chat-tabs">
     <div class="tab active" id="tab-msgs" onclick="switchTab('msgs')">💬 Mensagens</div>
-    <div class="tab" id="tab-photos" onclick="switchTab('photos')">📷 Fotos</div>
+    <div class="tab" id="tab-media" onclick="switchTab('media')">🖼 Mídia</div>
   </div>
+
   <div class="messages" id="messages"></div>
-  <div class="photos-grid" id="photos-grid" style="display:none"></div>
+
+  <div class="media-area" id="media-area">
+    <div class="media-filter-bar" id="media-filter-bar"></div>
+    <div class="media-grid" id="media-grid"></div>
+  </div>
 </div>
 
 <!-- LIGHTBOX -->
 <div id="lightbox">
   <button class="lb-close" onclick="closeLightbox()">×</button>
   <img id="lb-img" src="" alt="">
+  <video id="lb-vid" controls></video>
   <div class="lb-info" id="lb-info"></div>
   <div class="lb-nav">
     <button class="lb-nav-btn" onclick="lbNav(-1)">←</button>
+    <span class="lb-counter" id="lb-counter"></span>
     <button class="lb-nav-btn" onclick="lbNav(1)">→</button>
   </div>
 </div>
@@ -216,33 +238,66 @@ mark.hl.hl-active{background:var(--hl-active-bg);color:#fff}
 const COLORS=['#7c6af7','#f76a8c','#6ab8f7','#f7b26a','#6af7b2','#f76af7','#a0f76a','#f76a6a']
 let conversations=[], myName='', activeConv=null, filteredList=[]
 let hlMatches=[], hlIndex=-1
-let lbPhotos=[], lbCurrent=0
+let lbItems=[], lbCurrent=0
 let currentTab='msgs'
-// Store file objects for photo reading
-let allFileObjects=[]
+let allFiles=[] // all uploaded File objects
+let mediaFilter='all' // all | photos | videos | audio
 
 function dec(s){if(!s)return '';try{return decodeURIComponent(escape(s))}catch{return s}}
 function fmtTs(ms){if(!ms)return '';const d=new Date(ms);return d.toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'})}
-function fmtDate(ms){if(!ms)return '';const d=new Date(ms);return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'})}
+function fmtDate(ms){if(!ms)return '';return new Date(ms).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'})}
 function initials(n){return(n||'??').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2)}
 function colorFor(n){let h=0;for(let i=0;i<(n||'').length;i++)h=(h*31+n.charCodeAt(i))%COLORS.length;return COLORS[h]}
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
 
+// Build a fast filename lookup map
+let fileMap={} // filename -> File object (last wins, good enough)
+let fileMapFull={} // full relative path -> File object
+
+function buildFileMap(files){
+  fileMap={}
+  fileMapFull={}
+  for(const f of files){
+    const name=f.name
+    fileMap[name]=f
+    const rp=(f.webkitRelativePath||f.name).replace(/\\/g,'/')
+    fileMapFull[rp]=f
+    // also index by last 2 path segments e.g. "photos/image.jpg"
+    const parts=rp.split('/')
+    if(parts.length>=2)fileMapFull[parts.slice(-2).join('/')]=f
+    if(parts.length>=3)fileMapFull[parts.slice(-3).join('/')]=f
+  }
+}
+
+function findFile(uri){
+  // uri: "messages/inbox/username/photos/file.jpg"
+  if(!uri)return null
+  const norm=uri.replace(/\\/g,'/')
+  const parts=norm.split('/')
+  const name=parts[parts.length-1]
+  // try progressively longer suffixes
+  for(let i=1;i<=Math.min(4,parts.length);i++){
+    const key=parts.slice(-i).join('/')
+    if(fileMapFull[key])return fileMapFull[key]
+  }
+  return fileMap[name]||null
+}
+
 function show(id){
   ['upload-screen','loading-screen','list-screen','chat-screen'].forEach(s=>{
-    const el=document.getElementById(s)
-    if(s===id){el.style.display=(s==='list-screen'||s==='chat-screen')?'flex':'flex'}
-    else{el.style.display='none'}
+    document.getElementById(s).style.display=s===id?'flex':'none'
   })
 }
 
 async function handleFiles(fileList){
   const files=Array.from(fileList)
-  allFileObjects=files // save all for photo lookup
-  const jsonFiles=files.filter(f=>f.name.endsWith('.json')&&!['secret_conversations.json','your_chat_information.json'].includes(f.name))
-  if(!jsonFiles.length){alert('Nenhum arquivo JSON encontrado.');return}
-  show('loading-screen')
+  allFiles=files
+  buildFileMap(files)
 
+  const jsonFiles=files.filter(f=>f.name.endsWith('.json')&&!['secret_conversations.json','your_chat_information.json','secret_groups.json'].includes(f.name))
+  if(!jsonFiles.length){alert('Nenhum arquivo JSON encontrado.');return}
+
+  show('loading-screen')
   const byFolder={}
   for(const f of jsonFiles){
     const parts=(f.webkitRelativePath||f.name).split('/')
@@ -271,11 +326,14 @@ async function handleFiles(fileList){
     })
     msgs.sort((a,b)=>a.timestamp_ms-b.timestamp_ms)
 
-    // Count photos in messages
-    let photoCount=0
-    msgs.forEach(m=>{if(m.photos?.length)photoCount+=m.photos.length})
+    let photoCount=0, videoCount=0, audioCount=0
+    msgs.forEach(m=>{
+      if(m.photos?.length)photoCount+=m.photos.length
+      if(m.videos?.length)videoCount+=m.videos.length
+      if(m.audio_files?.length)audioCount+=m.audio_files.length
+    })
 
-    convList.push({folderName:folder,title:title||folder,participants,messages:msgs,msgCount:msgs.length,photoCount})
+    convList.push({folderName:folder,title:title||folder,participants,messages:msgs,msgCount:msgs.length,photoCount,videoCount,audioCount})
   }
 
   convList.sort((a,b)=>{
@@ -301,19 +359,22 @@ function renderList(list){
   const el=document.getElementById('conv-list')
   if(!list.length){el.innerHTML='<div class="empty">Nenhuma conversa encontrada.</div>';return}
   el.innerHTML=''
-  list.forEach((c,i)=>{
+  list.forEach(c=>{
     const color=colorFor(c.title)
     const last=c.messages[c.messages.length-1]
-    const lastTxt=getLastMsg(c)
     const time=last?fmtTs(last.timestamp_ms).split(' ')[0]:''
     const div=document.createElement('div')
     div.className='conv-item'
+    let badges=''
+    if(c.photoCount>0)badges+=`<span class="badge badge-photo">📷 ${c.photoCount}</span>`
+    if(c.videoCount>0)badges+=`<span class="badge badge-video">🎥 ${c.videoCount}</span>`
+    if(c.audioCount>0)badges+=`<span class="badge badge-audio">🎤 ${c.audioCount}</span>`
     div.innerHTML=`
       <div class="conv-avatar" style="background:${color}22;color:${color};border-color:${color}44">${initials(c.title)}</div>
       <div class="conv-info">
         <div class="conv-name">${esc(c.title)}</div>
-        <div class="conv-last">${esc(lastTxt)}</div>
-        ${c.photoCount>0?`<span class="conv-has-photos">📷 ${c.photoCount} foto${c.photoCount!==1?'s':''}</span>`:''}
+        <div class="conv-last">${esc(getLastMsg(c))}</div>
+        ${badges?`<div class="conv-media-badges">${badges}</div>`:''}
       </div>
       <div class="conv-right">
         <div class="conv-time">${time}</div>
@@ -339,18 +400,27 @@ function getLastMsg(c){
 function openConv(conv){
   activeConv=conv
   currentTab='msgs'
+  mediaFilter='all'
   const color=colorFor(conv.title)
   const av=document.getElementById('chat-avatar')
   av.textContent=initials(conv.title)
   av.style.cssText=`width:36px;height:36px;border-radius:50%;border:1.5px solid ${color}44;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;background:${color}22;color:${color}`
   document.getElementById('chat-title').textContent=conv.title
-  document.getElementById('chat-sub').textContent=`${conv.msgCount} msg${conv.photoCount>0?' · 📷 '+conv.photoCount+' fotos':''}`
+  const mediaSub=[]
+  if(conv.photoCount)mediaSub.push(`📷${conv.photoCount}`)
+  if(conv.videoCount)mediaSub.push(`🎥${conv.videoCount}`)
+  if(conv.audioCount)mediaSub.push(`🎤${conv.audioCount}`)
+  document.getElementById('chat-sub').textContent=`${conv.msgCount} msg${mediaSub.length?' · '+mediaSub.join(' '):''}` 
   document.getElementById('chat-search').value=''
   document.getElementById('search-nav-count').textContent=''
   document.getElementById('nav-up').disabled=true
   document.getElementById('nav-down').disabled=true
-  hlMatches=[]
-  hlIndex=-1
+  hlMatches=[];hlIndex=-1
+
+  // Show/hide media tab
+  const hasMedia=conv.photoCount||conv.videoCount||conv.audioCount
+  document.getElementById('tab-media').style.display=hasMedia?'':'none'
+
   switchTab('msgs')
   show('chat-screen')
   renderMessages(conv.messages,'')
@@ -359,126 +429,169 @@ function openConv(conv){
 function switchTab(tab){
   currentTab=tab
   document.getElementById('tab-msgs').className='tab'+(tab==='msgs'?' active':'')
-  document.getElementById('tab-photos').className='tab'+(tab==='photos'?' active':'')
+  document.getElementById('tab-media').className='tab'+(tab==='media'?' active':'')
   document.getElementById('messages').style.display=tab==='msgs'?'flex':'none'
-  document.getElementById('photos-grid').style.display=tab==='photos'?'grid':'none'
-  document.getElementById('chat-search-wrap'||'.chat-search-wrap').style.display=tab==='msgs'?'flex':'none'
-  if(tab==='photos')renderPhotos()
+  document.getElementById('media-area').style.display=tab==='media'?'flex':'none'
+  document.getElementById('chat-search-wrap').style.display=tab==='msgs'?'flex':'none'
+  if(tab==='media'&&activeConv)renderMedia()
 }
 
-// Fix switchTab for search wrap
-function switchTab(tab){
-  currentTab=tab
-  document.getElementById('tab-msgs').className='tab'+(tab==='msgs'?' active':'')
-  document.getElementById('tab-photos').className='tab'+(tab==='photos'?' active':'')
-  document.getElementById('messages').style.display=tab==='msgs'?'flex':'none'
-  document.getElementById('photos-grid').style.display=tab==='photos'?'grid':'none'
-  const sw=document.querySelector('.chat-search-wrap')
-  if(sw)sw.style.display=tab==='msgs'?'flex':'none'
-  if(tab==='photos'&&activeConv)renderPhotos()
-}
+function renderMedia(){
+  if(!activeConv)return
+  mediaFilter=mediaFilter||'all'
 
-async function renderPhotos(){
-  const grid=document.getElementById('photos-grid')
-  grid.innerHTML='<div class="no-photos" style="grid-column:1/-1;color:var(--muted);font-size:13px;padding:2rem;text-align:center">Carregando fotos…</div>'
-  
-  if(!activeConv){grid.innerHTML='<div class="no-photos">Nenhuma conversa ativa.</div>';return}
-
-  // Collect all photo references from messages
-  const photoMsgs=[]
+  // Collect all media from messages
+  const items=[]
   activeConv.messages.forEach(m=>{
+    const sender=dec(m.sender_name||'')
+    const ts=m.timestamp_ms
     if(m.photos?.length){
-      m.photos.forEach(p=>{
-        photoMsgs.push({uri:p.uri,creation_timestamp:p.creation_timestamp||m.timestamp_ms,sender:dec(m.sender_name||''),ts:m.timestamp_ms})
-      })
+      m.photos.forEach(p=>items.push({type:'photo',uri:p.uri,ts:p.creation_timestamp*1000||ts,sender,name:(p.uri||'').split('/').pop()}))
+    }
+    if(m.videos?.length){
+      m.videos.forEach(v=>items.push({type:'video',uri:v.uri,ts:v.creation_timestamp*1000||ts,sender,name:(v.uri||'').split('/').pop()}))
+    }
+    if(m.audio_files?.length){
+      m.audio_files.forEach(a=>items.push({type:'audio',uri:a.uri,ts:a.creation_timestamp*1000||ts,sender,name:(a.uri||'').split('/').pop()}))
     }
   })
 
-  if(!photoMsgs.length){
-    grid.innerHTML='<div class="no-photos">Nenhuma foto nesta conversa.</div>'
+  // Filter bar
+  const bar=document.getElementById('media-filter-bar')
+  const photos=items.filter(i=>i.type==='photo').length
+  const videos=items.filter(i=>i.type==='video').length
+  const audios=items.filter(i=>i.type==='audio').length
+  bar.innerHTML=`
+    <button class="filter-btn${mediaFilter==='all'?' active':''}" onclick="setMediaFilter('all')">Tudo (${items.length})</button>
+    ${photos?`<button class="filter-btn${mediaFilter==='photos'?' active':''}" onclick="setMediaFilter('photos')">📷 Fotos (${photos})</button>`:''}
+    ${videos?`<button class="filter-btn${mediaFilter==='videos'?' active':''}" onclick="setMediaFilter('videos')">🎥 Vídeos (${videos})</button>`:''}
+    ${audios?`<button class="filter-btn${mediaFilter==='audio'?' active':''}" onclick="setMediaFilter('audio')">🎤 Áudios (${audios})</button>`:''}
+  `
+
+  const filtered=mediaFilter==='all'?items:items.filter(i=>
+    (mediaFilter==='photos'&&i.type==='photo')||
+    (mediaFilter==='videos'&&i.type==='video')||
+    (mediaFilter==='audio'&&i.type==='audio')
+  )
+
+  const grid=document.getElementById('media-grid')
+  grid.innerHTML=''
+
+  // Build lightbox list (only photos and videos)
+  lbItems=filtered.filter(i=>i.type==='photo'||i.type==='video')
+
+  if(!filtered.length){
+    grid.innerHTML='<div class="no-media">Nenhuma mídia encontrada.</div>'
     return
   }
 
-  // Try to match photo files from uploaded files
-  grid.innerHTML=''
-  lbPhotos=[]
+  // Adjust grid for audio
+  const hasAudio=filtered.some(i=>i.type==='audio')
+  const onlyAudio=filtered.every(i=>i.type==='audio')
+  grid.style.gridTemplateColumns=onlyAudio?'1fr':'repeat(3,1fr)'
 
-  for(const photo of photoMsgs){
-    // uri looks like: messages/inbox/username/photos/image.jpg
-    const uriParts=photo.uri.split('/')
-    const fileName=uriParts[uriParts.length-1]
-    
-    // Find matching file in uploaded files
-    const match=allFileObjects.find(f=>{
-      const fp=f.webkitRelativePath||f.name
-      return fp.endsWith(fileName)||f.name===fileName
-    })
+  filtered.forEach((item,idx)=>{
+    const file=findFile(item.uri)
+    const lbIdx=lbItems.indexOf(item)
 
-    const item=document.createElement('div')
-    item.className='photo-item'
-    const idx=lbPhotos.length
-
-    if(match){
-      const url=URL.createObjectURL(match)
-      lbPhotos.push({url,sender:photo.sender,ts:photo.ts,name:fileName})
-      item.innerHTML=`<img src="${url}" loading="lazy" alt="foto"><div class="photo-sender">${esc(photo.sender)}</div><div class="photo-date">${fmtDate(photo.ts)}</div>`
-      item.onclick=()=>openLightbox(idx)
-    } else {
-      // Show placeholder with filename
-      lbPhotos.push({url:null,sender:photo.sender,ts:photo.ts,name:fileName})
-      item.innerHTML=`<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:4px;padding:8px"><div style="font-size:24px;opacity:.3">📷</div><div style="font-size:9px;color:var(--muted);text-align:center;font-family:'DM Mono',monospace;word-break:break-all">${esc(fileName)}</div><div style="font-size:9px;color:var(--muted)">${fmtDate(photo.ts)}</div></div>`
-      item.style.cursor='default'
+    if(item.type==='audio'){
+      const div=document.createElement('div')
+      div.className='audio-item'
+      div.style.gridColumn='1/-1'
+      if(file){
+        const url=URL.createObjectURL(file)
+        div.innerHTML=`<div class="audio-meta">${esc(item.sender)} · ${fmtTs(item.ts)}</div><audio controls src="${url}"></audio>`
+      } else {
+        div.innerHTML=`<div class="audio-meta">${esc(item.sender)} · ${fmtTs(item.ts)}</div><div style="font-size:12px;color:var(--muted)">${esc(item.name)}</div>`
+      }
+      grid.appendChild(div)
+      return
     }
-    grid.appendChild(item)
-  }
 
-  if(!lbPhotos.length)grid.innerHTML='<div class="no-photos">Nenhuma foto encontrada.</div>'
+    const div=document.createElement('div')
+    div.className='media-item'
+
+    if(file){
+      const url=URL.createObjectURL(file)
+      if(item.type==='photo'){
+        div.innerHTML=`<img src="${url}" loading="lazy" alt=""><div class="media-overlay"><span class="media-sender">${esc(item.sender)}</span><span class="media-date">${fmtDate(item.ts)}</span></div>`
+        div.onclick=()=>openLightbox(lbIdx)
+      } else {
+        div.innerHTML=`<video src="${url}" muted playsinline></video><div class="media-overlay"><span class="media-sender">${esc(item.sender)}</span><span class="media-date">${fmtDate(item.ts)}</span></div><div class="media-type-icon">▶</div>`
+        div.onclick=()=>openLightbox(lbIdx)
+      }
+    } else {
+      // No file found — show placeholder
+      const icon=item.type==='photo'?'📷':'🎥'
+      div.innerHTML=`<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:4px;padding:8px"><div style="font-size:22px;opacity:.3">${icon}</div><div style="font-size:8px;color:var(--muted);text-align:center;font-family:'DM Mono',monospace;word-break:break-all">${esc(item.name)}</div><div style="font-size:9px;color:var(--muted)">${fmtDate(item.ts)}</div></div>`
+      div.style.cursor='default'
+    }
+    grid.appendChild(div)
+  })
 }
+
+function setMediaFilter(f){mediaFilter=f;renderMedia()}
 
 function openLightbox(idx){
+  if(idx<0||idx>=lbItems.length)return
   lbCurrent=idx
-  const p=lbPhotos[idx]
-  if(!p||!p.url)return
-  document.getElementById('lb-img').src=p.url
-  document.getElementById('lb-info').textContent=`${p.sender} · ${fmtTs(p.ts)} · ${p.name}`
+  const item=lbItems[idx]
+  const file=findFile(item.uri)
+  if(!file)return
+
+  const url=URL.createObjectURL(file)
+  const img=document.getElementById('lb-img')
+  const vid=document.getElementById('lb-vid')
+
+  if(item.type==='photo'){
+    img.src=url;img.style.display='block'
+    vid.style.display='none';vid.src=''
+  } else {
+    vid.src=url;vid.style.display='block'
+    img.style.display='none';img.src=''
+  }
+
+  document.getElementById('lb-info').textContent=`${item.sender} · ${fmtTs(item.ts)} · ${item.name}`
+  document.getElementById('lb-counter').textContent=`${idx+1}/${lbItems.length}`
   document.getElementById('lightbox').classList.add('open')
 }
-function closeLightbox(){document.getElementById('lightbox').classList.remove('open')}
-function lbNav(dir){
-  let next=lbCurrent+dir
-  while(next>=0&&next<lbPhotos.length&&!lbPhotos[next].url)next+=dir
-  if(next>=0&&next<lbPhotos.length)openLightbox(next)
+
+function closeLightbox(){
+  document.getElementById('lightbox').classList.remove('open')
+  const vid=document.getElementById('lb-vid')
+  vid.pause();vid.src=''
 }
 
-function renderMessages(msgs, filter){
+function lbNav(dir){
+  let next=lbCurrent+dir
+  // skip items without files
+  while(next>=0&&next<lbItems.length&&!findFile(lbItems[next].uri))next+=dir
+  if(next>=0&&next<lbItems.length)openLightbox(next)
+}
+
+function renderMessages(msgs,filter){
   const wrap=document.getElementById('messages')
   const q=filter.trim().toLowerCase()
   const list=q?msgs.filter(m=>dec(m.content||'').toLowerCase().includes(q)||dec(m.sender_name||'').toLowerCase().includes(q)):msgs
 
   if(!list.length){wrap.innerHTML='<div class="empty">Nenhuma mensagem encontrada.</div>';hlMatches=[];updateNavBtns();return}
 
-  let html='', prevDate='', prevSender=''
-  list.forEach((m)=>{
+  let html='',prevDate='',prevSender=''
+  list.forEach(m=>{
     const sender=dec(m.sender_name||'')
     const isMe=sender===myName
     const side=isMe?'msg-me':'msg-them'
     const time=fmtTs(m.timestamp_ms)
     const date=fmtDate(m.timestamp_ms)
 
-    if(date!==prevDate){
-      html+=`<div class="date-divider">${date}</div>`
-      prevDate=date
-    }
+    if(date!==prevDate){html+=`<div class="date-divider">${date}</div>`;prevDate=date}
 
     let txt=dec(m.content||'')
     let contentHtml=''
     if(txt){
-      let escaped=esc(txt)
-      if(q){
-        const re=new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi')
-        escaped=escaped.replace(re,'<mark class="hl">$1</mark>')
-      }
-      contentHtml=`<span class="bubble-text">${escaped}</span>`
+      let e=esc(txt)
+      if(q)e=e.replace(new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'),'<mark class="hl">$1</mark>')
+      contentHtml=`<span class="bubble-text">${e}</span>`
     } else if(m.photos?.length){contentHtml='<span class="media-tag">📷 Foto</span>'}
     else if(m.audio_files?.length){contentHtml='<span class="media-tag">🎤 Áudio</span>'}
     else if(m.videos?.length){contentHtml='<span class="media-tag">🎥 Vídeo</span>'}
@@ -486,25 +599,17 @@ function renderMessages(msgs, filter){
     else{contentHtml='<span class="media-tag">📎 Mídia</span>'}
 
     const showSender=!isMe&&sender!==prevSender
-    html+=`<div class="msg-row ${side}">
-      ${showSender?`<div class="msg-sender">${esc(sender)}</div>`:''}
-      <div class="bubble">${contentHtml}<span class="msg-time">${time.split(' ')[1]||''}</span></div>
-    </div>`
+    html+=`<div class="msg-row ${side}">${showSender?`<div class="msg-sender">${esc(sender)}</div>`:''}<div class="bubble">${contentHtml}<span class="msg-time">${time.split(' ')[1]||''}</span></div></div>`
     prevSender=sender
   })
   wrap.innerHTML=html
 
-  // Build highlight index
   hlMatches=Array.from(wrap.querySelectorAll('mark.hl'))
   hlIndex=hlMatches.length>0?0:-1
   updateNavBtns()
 
-  if(q&&hlMatches.length>0){
-    activateHL(0)
-  } else {
-    wrap.scrollTop=wrap.scrollHeight
-    document.getElementById('search-nav-count').textContent=''
-  }
+  if(q&&hlMatches.length>0){activateHL(0)}
+  else{wrap.scrollTop=wrap.scrollHeight;document.getElementById('search-nav-count').textContent=''}
 }
 
 function activateHL(i){
@@ -526,17 +631,16 @@ function navigateHL(dir){
 }
 
 function updateNavBtns(){
-  const hasHL=hlMatches.length>0
-  document.getElementById('nav-up').disabled=!hasHL
-  document.getElementById('nav-down').disabled=!hasHL
-  if(!hasHL)document.getElementById('search-nav-count').textContent=''
+  const has=hlMatches.length>0
+  document.getElementById('nav-up').disabled=!has
+  document.getElementById('nav-down').disabled=!has
+  if(!has)document.getElementById('search-nav-count').textContent=''
 }
 
 function showList(){show('list-screen')}
 
 function resetApp(){
-  conversations=[];filteredList=[];activeConv=null
-  allFileObjects=[];lbPhotos=[]
+  conversations=[];filteredList=[];activeConv=null;allFiles=[];fileMap={};fileMapFull={};lbItems=[]
   document.getElementById('search-input').value=''
   document.getElementById('conv-list').innerHTML=''
   show('upload-screen')
@@ -556,16 +660,14 @@ document.getElementById('search-input').addEventListener('input',function(){
   document.getElementById('list-meta').textContent=`${f.length} de ${conversations.length} conversas`
 })
 
-// Chat search with debounce
-let chatSearchTimer=null
+// Chat search
+let chatTimer=null
 document.getElementById('chat-search').addEventListener('input',function(){
-  clearTimeout(chatSearchTimer)
-  chatSearchTimer=setTimeout(()=>{
-    if(activeConv)renderMessages(activeConv.messages,this.value)
-  },200)
+  clearTimeout(chatTimer)
+  chatTimer=setTimeout(()=>{if(activeConv)renderMessages(activeConv.messages,this.value)},200)
 })
 
-// Drop zone
+// Drop
 const dz=document.getElementById('drop-zone')
 dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('drag-over')})
 dz.addEventListener('dragleave',()=>dz.classList.remove('drag-over'))
@@ -573,17 +675,15 @@ dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('drag-over
 document.getElementById('folder-input').addEventListener('change',e=>handleFiles(e.target.files))
 document.getElementById('files-input').addEventListener('change',e=>handleFiles(e.target.files))
 
-// Keyboard nav
+// Keyboard
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape')closeLightbox()
   if(document.getElementById('lightbox').classList.contains('open')){
     if(e.key==='ArrowLeft')lbNav(-1)
     if(e.key==='ArrowRight')lbNav(1)
   }
-  if(document.getElementById('chat-screen').style.display==='flex'&&currentTab==='msgs'){
-    if(e.key==='Enter'&&document.getElementById('chat-search')===document.activeElement){
-      navigateHL(e.shiftKey?-1:1)
-    }
+  if(currentTab==='msgs'&&document.getElementById('chat-search')===document.activeElement&&e.key==='Enter'){
+    navigateHL(e.shiftKey?-1:1)
   }
 })
 
