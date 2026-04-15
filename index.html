@@ -3,1184 +3,372 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DM Explorer — Instagram</title>
+<title>DM Explorer</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root {
-  --bg: #0e0e0f;
-  --surface: #161618;
-  --surface2: #1e1e21;
-  --border: rgba(255,255,255,0.07);
-  --border2: rgba(255,255,255,0.12);
-  --text: #f0eeea;
-  --muted: #7a7875;
-  --accent: #c8f53f;
-  --accent-dim: rgba(200,245,63,0.12);
-  --accent-text: #0e0e0f;
-  --red: #ff5c5c;
-  --blue: #5c9fff;
-  --font: 'Syne', sans-serif;
-  --mono: 'DM Mono', monospace;
-  --radius: 10px;
-  --radius-lg: 16px;
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0a0a;--surface:#111;--surface2:#1a1a1a;--border:#2a2a2a;--border2:#333;
+  --text:#f0ede8;--muted:#888880;--accent:#e8d5b0;--accent2:#c4a882;
+  --me:#1e1e3a;--me-border:#3a3a6a;--me-text:#a0a0e0;
 }
-
-* { box-sizing: border-box; margin: 0; padding: 0; }
-
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--font);
-  min-height: 100vh;
-  overflow-x: hidden;
-}
-
-/* scrollbar */
-::-webkit-scrollbar { width: 4px; height: 4px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
-
-/* Layout */
-#app { min-height: 100vh; }
-
-/* ── UPLOAD SCREEN ── */
-#upload-view {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem;
-}
-
-.logo {
-  font-size: 13px;
-  font-family: var(--mono);
-  color: var(--muted);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  margin-bottom: 3rem;
-}
-
-.logo span { color: var(--accent); }
-
-.drop-zone {
-  width: 100%;
-  max-width: 480px;
-  border: 1.5px dashed var(--border2);
-  border-radius: var(--radius-lg);
-  padding: 3rem 2rem;
-  text-align: center;
-  cursor: pointer;
-  transition: border-color 0.2s, background 0.2s;
-  position: relative;
-}
-
-.drop-zone:hover, .drop-zone.over {
-  border-color: var(--accent);
-  background: var(--accent-dim);
-}
-
-.drop-zone input { display: none; }
-
-.drop-icon {
-  width: 48px; height: 48px;
-  border: 1.5px solid var(--border2);
-  border-radius: 12px;
-  display: flex; align-items: center; justify-content: center;
-  margin: 0 auto 1.25rem;
-  color: var(--muted);
-}
-
-.drop-zone h2 {
-  font-size: 18px;
-  font-weight: 600;
-  margin-bottom: 6px;
-  color: var(--text);
-}
-
-.drop-zone p {
-  font-size: 13px;
-  color: var(--muted);
-  line-height: 1.6;
-}
-
-.drop-zone .hint {
-  margin-top: 1.5rem;
-  display: flex;
-  gap: 8px;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-.tag {
-  font-size: 11px;
-  font-family: var(--mono);
-  padding: 3px 8px;
-  border-radius: 4px;
-  background: var(--surface2);
-  color: var(--muted);
-  border: 1px solid var(--border);
-}
-
-.progress-wrap {
-  width: 100%;
-  max-width: 480px;
-  margin-top: 1.5rem;
-}
-
-.progress-label {
-  font-size: 12px;
-  font-family: var(--mono);
-  color: var(--muted);
-  margin-bottom: 8px;
-}
-
-.progress-track {
-  height: 2px;
-  background: var(--surface2);
-  border-radius: 1px;
-  overflow: hidden;
-}
-
-.progress-fill {
-  height: 100%;
-  background: var(--accent);
-  border-radius: 1px;
-  transition: width 0.3s ease;
-}
-
-/* ── DASHBOARD ── */
-#dashboard-view { display: none; min-height: 100vh; }
-
-.topbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1rem 1.5rem;
-  border-bottom: 1px solid var(--border);
-  position: sticky;
-  top: 0;
-  background: rgba(14,14,15,0.92);
-  backdrop-filter: blur(12px);
-  z-index: 10;
-}
-
-.topbar-brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.brand-dot {
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  background: var(--accent);
-}
-
-.brand-name {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text);
-}
-
-.brand-sub {
-  font-size: 11px;
-  font-family: var(--mono);
-  color: var(--muted);
-}
-
-.topbar-actions { display: flex; gap: 8px; align-items: center; }
-
-.btn {
-  font-family: var(--font);
-  font-size: 12px;
-  font-weight: 500;
-  padding: 6px 14px;
-  border-radius: 6px;
-  border: 1px solid var(--border2);
-  background: var(--surface2);
-  color: var(--muted);
-  cursor: pointer;
-  transition: all 0.15s;
-}
-
-.btn:hover { border-color: var(--accent); color: var(--accent); }
-
-.btn-accent {
-  background: var(--accent);
-  color: var(--accent-text);
-  border-color: var(--accent);
-  font-weight: 600;
-}
-
-.btn-accent:hover { opacity: 0.85; color: var(--accent-text); }
-
-.layout {
-  display: grid;
-  grid-template-columns: 280px 1fr;
-  height: calc(100vh - 57px);
-}
-
-/* ── SIDEBAR ── */
-.sidebar {
-  border-right: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.sidebar-header {
-  padding: 1rem;
-  border-bottom: 1px solid var(--border);
-}
-
-.search-input {
-  width: 100%;
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 8px 12px;
-  font-family: var(--font);
-  font-size: 13px;
-  color: var(--text);
-  outline: none;
-  transition: border-color 0.15s;
-}
-
-.search-input::placeholder { color: var(--muted); }
-.search-input:focus { border-color: var(--border2); }
-
-.metrics-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 6px;
-  padding: 1rem;
-  border-bottom: 1px solid var(--border);
-}
-
-.metric-card {
-  background: var(--surface2);
-  border-radius: 8px;
-  padding: 10px;
-}
-
-.metric-val {
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--text);
-  line-height: 1;
-}
-
-.metric-lbl {
-  font-size: 10px;
-  font-family: var(--mono);
-  color: var(--muted);
-  margin-top: 3px;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-
-.convo-list {
-  flex: 1;
-  overflow-y: auto;
-  padding: 6px;
-}
-
-.convo-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 10px;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background 0.1s;
-}
-
-.convo-item:hover { background: var(--surface2); }
-.convo-item.active { background: var(--accent-dim); }
-
-.avatar {
-  width: 36px; height: 36px;
-  border-radius: 50%;
-  background: var(--surface2);
-  border: 1px solid var(--border2);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--muted);
-  flex-shrink: 0;
-}
-
-.convo-item.active .avatar { border-color: var(--accent); color: var(--accent); }
-
-.convo-info { flex: 1; min-width: 0; }
-
-.convo-name {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.convo-preview {
-  font-size: 11px;
-  color: var(--muted);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin-top: 1px;
-}
-
-.convo-meta {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 3px;
-  flex-shrink: 0;
-}
-
-.badge {
-  font-size: 10px;
-  font-family: var(--mono);
-  padding: 2px 6px;
-  border-radius: 4px;
-}
-
-.badge-photo { background: rgba(200,245,63,0.15); color: var(--accent); }
-.badge-msg { background: var(--surface2); color: var(--muted); }
-
-/* ── MAIN PANEL ── */
-.main {
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.panel-tabs {
-  display: flex;
-  gap: 2px;
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid var(--border);
-}
-
-.panel-tab {
-  font-family: var(--font);
-  font-size: 13px;
-  font-weight: 500;
-  padding: 5px 14px;
-  border-radius: 6px;
-  border: none;
-  background: transparent;
-  color: var(--muted);
-  cursor: pointer;
-  transition: all 0.15s;
-}
-
-.panel-tab:hover { color: var(--text); }
-.panel-tab.active { background: var(--surface2); color: var(--text); }
-
-.panel-content {
-  flex: 1;
-  overflow-y: auto;
-  padding: 1.25rem;
-}
-
-/* ── MESSAGES ── */
-.msg-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  max-height: 100%;
-}
-
-.msg-date-sep {
-  text-align: center;
-  font-size: 10px;
-  font-family: var(--mono);
-  color: var(--muted);
-  padding: 8px 0;
-}
-
-.msg-row { display: flex; }
-.msg-row.me { justify-content: flex-end; }
-.msg-row.other { justify-content: flex-start; }
-
-.bubble {
-  max-width: 68%;
-  padding: 8px 12px;
-  border-radius: 12px;
-  font-size: 13px;
-  line-height: 1.55;
-}
-
-.bubble.me {
-  background: var(--accent);
-  color: var(--accent-text);
-  border-bottom-right-radius: 3px;
-  font-weight: 500;
-}
-
-.bubble.other {
-  background: var(--surface2);
-  color: var(--text);
-  border-bottom-left-radius: 3px;
-}
-
-.bubble-media {
-  font-size: 11px;
-  font-family: var(--mono);
-  opacity: 0.6;
-  padding: 6px 10px;
-  border: 1px dashed var(--border2);
-  border-radius: 8px;
-  background: transparent;
-  max-width: 160px;
-}
-
-.bubble-meta {
-  font-size: 10px;
-  font-family: var(--mono);
-  margin-top: 3px;
-  opacity: 0.5;
-}
-.msg-row.me .bubble-meta { text-align: right; }
-
-/* ── PHOTO GRID ── */
-.photo-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  gap: 6px;
-}
-
-.photo-thumb {
-  width: 100%;
-  aspect-ratio: 1;
-  object-fit: cover;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  cursor: pointer;
-  transition: transform 0.15s, border-color 0.15s;
-}
-
-.photo-thumb:hover { transform: scale(1.03); border-color: var(--accent); }
-
-.photo-info {
-  font-size: 11px;
-  font-family: var(--mono);
-  color: var(--muted);
-  margin-top: 4px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* ── SEARCH ── */
-.search-result {
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 12px;
-  margin-bottom: 8px;
-  cursor: pointer;
-  transition: border-color 0.15s;
-}
-
-.search-result:hover { border-color: var(--border2); }
-
-.search-result-meta {
-  font-size: 11px;
-  font-family: var(--mono);
-  color: var(--muted);
-  margin-bottom: 5px;
-}
-
-.search-result-text {
-  font-size: 13px;
-  color: var(--text);
-  line-height: 1.5;
-}
-
-mark {
-  background: rgba(200,245,63,0.25);
-  color: var(--accent);
-  border-radius: 2px;
-  padding: 0 1px;
-}
-
-/* ── EMPTY STATES ── */
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  min-height: 200px;
-  color: var(--muted);
-  font-size: 13px;
-  text-align: center;
-  gap: 8px;
-}
-
-.empty-state .icon {
-  font-size: 28px;
-  opacity: 0.4;
-  margin-bottom: 4px;
-}
-
-/* ── LIGHTBOX ── */
-.lightbox {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.92);
-  z-index: 100;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem;
-}
-
-.lightbox.open { display: flex; }
-
-.lightbox img {
-  max-width: 90vw;
-  max-height: 85vh;
-  object-fit: contain;
-  border-radius: var(--radius);
-}
-
-.lightbox-close {
-  position: absolute;
-  top: 1rem;
-  right: 1.25rem;
-  font-size: 24px;
-  color: var(--muted);
-  cursor: pointer;
-  background: none;
-  border: none;
-  line-height: 1;
-}
-
-.lightbox-close:hover { color: var(--text); }
-
-.lightbox-info {
-  position: absolute;
-  bottom: 1.5rem;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 12px;
-  font-family: var(--mono);
-  color: var(--muted);
-  text-align: center;
-}
-
-/* ── RESPONSIVE ── */
-@media (max-width: 640px) {
-  .layout { grid-template-columns: 1fr; }
-  .sidebar { height: 50vh; }
-}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Syne',sans-serif}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+input,button{font-family:inherit}
+.logo{font-weight:800;font-size:22px;letter-spacing:-0.5px;color:var(--text)}
+.logo span{color:var(--accent)}
+
+/* UPLOAD */
+#upload-screen{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;gap:2rem}
+.tagline{font-size:15px;color:var(--muted);margin-top:6px;font-weight:400;text-align:center}
+.drop-zone{width:100%;max-width:520px;border:1.5px dashed var(--border2);border-radius:20px;padding:3rem 2rem;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;background:var(--surface)}
+.drop-zone:hover,.drop-zone.drag-over{border-color:var(--accent2);background:var(--surface2)}
+.drop-icon{font-size:32px;margin-bottom:12px;opacity:.6}
+.drop-title{font-size:16px;font-weight:600;margin-bottom:6px}
+.drop-title code{background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:2px 6px;font-family:'DM Mono',monospace;font-size:13px;color:var(--accent)}
+.drop-sub{font-size:13px;color:var(--muted);margin-bottom:16px}
+.upload-note{font-size:12px;color:var(--muted);opacity:.6}
+.btn-group{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:8px}
+.upload-btn{background:none;border:1px solid var(--border2);border-radius:10px;padding:9px 18px;color:var(--muted);font-size:13px;cursor:pointer;transition:color .15s,border-color .15s}
+.upload-btn:hover{color:var(--text);border-color:var(--accent2)}
+
+/* LOADING */
+#loading-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;display:none}
+.loading-inner{text-align:center;width:300px}
+.loading-title{font-size:16px;font-weight:600;margin-bottom:16px}
+.progress-bar{height:3px;background:var(--border);border-radius:2px;overflow:hidden;margin-bottom:10px}
+.progress-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .15s;width:0%}
+.loading-count{font-size:12px;color:var(--muted);font-family:'DM Mono',monospace}
+
+/* LIST */
+#list-screen{display:none;flex-direction:column;height:100vh;max-width:680px;margin:0 auto;width:100%}
+.list-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);flex-shrink:0}
+.list-meta{font-size:12px;color:var(--muted);font-family:'DM Mono',monospace}
+.search-wrap{padding:12px 16px;border-bottom:1px solid var(--border);flex-shrink:0}
+.search-input{width:100%;background:var(--surface);border:1px solid var(--border2);border-radius:10px;padding:10px 14px;font-size:14px;color:var(--text);outline:none;transition:border-color .15s}
+.search-input::placeholder{color:var(--muted)}
+.search-input:focus{border-color:var(--accent2)}
+.conv-list{flex:1;overflow-y:auto;padding:8px 0}
+.conv-item{display:flex;align-items:center;gap:12px;padding:12px 20px;cursor:pointer;transition:background .1s;border-bottom:1px solid var(--border)}
+.conv-item:hover{background:var(--surface)}
+.conv-avatar{width:44px;height:44px;border-radius:50%;border:1.5px solid;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0;letter-spacing:-0.5px}
+.conv-info{flex:1;min-width:0}
+.conv-name{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.conv-last{font-size:12px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.conv-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
+.conv-time{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace}
+.conv-count{font-size:11px;background:var(--surface2);color:var(--muted);border-radius:20px;padding:2px 8px;font-family:'DM Mono',monospace}
+.reset-btn{margin:12px 20px;background:none;border:1px solid var(--border2);border-radius:10px;padding:10px;color:var(--muted);font-size:13px;cursor:pointer;transition:color .15s,border-color .15s;flex-shrink:0}
+.reset-btn:hover{color:var(--text);border-color:var(--accent2)}
+.empty{padding:3rem;text-align:center;color:var(--muted);font-size:14px}
+.folder-badge{font-size:10px;font-family:'DM Mono',monospace;background:var(--surface2);color:var(--muted);padding:2px 6px;border-radius:4px;margin-top:2px;display:inline-block}
+
+/* CHAT */
+#chat-screen{display:none;flex-direction:column;height:100vh;max-width:680px;margin:0 auto;width:100%}
+.chat-header{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border);flex-shrink:0}
+.back-btn{background:none;border:1px solid var(--border2);border-radius:8px;color:var(--muted);font-size:16px;width:34px;height:34px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:color .15s}
+.back-btn:hover{color:var(--text)}
+.chat-avatar{width:36px;height:36px;border-radius:50%;border:1.5px solid;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+.chat-header-info{flex:1;min-width:0}
+.chat-name{font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chat-sub{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace}
+.chat-search-wrap{padding:10px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0}
+.chat-search-input{flex:1;background:var(--surface);border:1px solid var(--border2);border-radius:8px;padding:8px 12px;font-size:13px;color:var(--text);outline:none;transition:border-color .15s}
+.chat-search-input::placeholder{color:var(--muted)}
+.chat-search-input:focus{border-color:var(--accent2)}
+.chat-search-count{font-size:12px;color:var(--accent);font-family:'DM Mono',monospace;flex-shrink:0}
+.messages{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:4px}
+.msg-row{display:flex;flex-direction:column;max-width:75%}
+.msg-me{align-self:flex-end;align-items:flex-end}
+.msg-them{align-self:flex-start;align-items:flex-start}
+.msg-sender{font-size:11px;color:var(--muted);margin-bottom:2px;padding-left:4px}
+.bubble{padding:9px 13px;border-radius:16px;font-size:14px;line-height:1.55;word-break:break-word;display:flex;gap:8px;align-items:flex-end}
+.msg-me .bubble{background:var(--me);border:1px solid var(--me-border);color:var(--me-text);border-bottom-right-radius:4px}
+.msg-them .bubble{background:var(--surface);border:1px solid var(--border2);color:var(--text);border-bottom-left-radius:4px}
+.bubble-text{flex:1}
+.msg-time{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;flex-shrink:0;opacity:.7;white-space:nowrap}
+.media-tag{font-size:12px;color:var(--muted);font-style:italic}
+.date-divider{text-align:center;font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;margin:8px 0;opacity:.6}
+.highlight{background:rgba(232,213,176,.25);border-radius:3px;padding:0 2px}
 </style>
 </head>
 <body>
 
-<div id="app">
-
 <!-- UPLOAD -->
-<div id="upload-view">
-  <div class="logo"><span>DM</span> Explorer</div>
-
-  <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
-    <input type="file" id="fileInput" accept=".zip" multiple>
-    <div class="drop-icon">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
-        <polyline points="17 8 12 3 7 8"/>
-        <line x1="12" y1="3" x2="12" y2="15"/>
-      </svg>
-    </div>
-    <h2>Solte o ZIP aqui</h2>
-    <p>Carregue um ou mais exports do Instagram<br>Tudo roda localmente — nenhum dado é enviado</p>
-    <div class="hint">
-      <span class="tag">conversas</span>
-      <span class="tag">fotos</span>
-      <span class="tag">áudios</span>
-      <span class="tag">busca</span>
+<div id="upload-screen">
+  <div style="text-align:center">
+    <div class="logo">DM<span>explorer</span></div>
+    <p class="tagline">Visualize suas conversas do Instagram exportadas em JSON.</p>
+  </div>
+  <div class="drop-zone" id="drop-zone">
+    <div class="drop-icon">⬆</div>
+    <div class="drop-title">Solte a pasta <code>inbox</code> ou <code>message_requests</code> aqui</div>
+    <div class="drop-sub">Ou use os botões abaixo para selecionar</div>
+    <div class="btn-group">
+      <button class="upload-btn" onclick="document.getElementById('folder-input').click()">📁 Selecionar pasta</button>
+      <button class="upload-btn" onclick="document.getElementById('files-input').click()">📄 Selecionar arquivos JSON</button>
     </div>
   </div>
+  <input type="file" id="folder-input" webkitdirectory multiple accept=".json" style="display:none">
+  <input type="file" id="files-input" multiple accept=".json" style="display:none">
+  <div class="upload-note">🔒 Tudo roda no navegador — nenhum dado é enviado a servidores.</div>
+</div>
 
-  <div class="progress-wrap" id="progressWrap" style="display:none">
-    <div class="progress-label" id="progressLabel">Aguardando...</div>
-    <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+<!-- LOADING -->
+<div id="loading-screen">
+  <div class="loading-inner">
+    <div class="loading-title">Carregando conversas…</div>
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+    <div class="loading-count" id="loading-count">0 / 0 arquivos</div>
   </div>
 </div>
 
-<!-- DASHBOARD -->
-<div id="dashboard-view">
-  <div class="topbar">
-    <div class="topbar-brand">
-      <div class="brand-dot"></div>
-      <div>
-        <div class="brand-name" id="brandName">DM Explorer</div>
-        <div class="brand-sub" id="brandSub">—</div>
-      </div>
-    </div>
-    <div class="topbar-actions">
-      <button class="btn btn-accent" onclick="document.getElementById('fileInput2').click()">+ Adicionar ZIP</button>
-      <input type="file" id="fileInput2" accept=".zip" multiple style="display:none">
-      <button class="btn" onclick="resetApp()">Limpar</button>
-    </div>
+<!-- LIST -->
+<div id="list-screen">
+  <div class="list-header">
+    <div class="logo">DM<span>explorer</span></div>
+    <div class="list-meta" id="list-meta"></div>
   </div>
-
-  <div class="layout">
-    <div class="sidebar">
-      <div class="sidebar-header">
-        <input class="search-input" type="text" id="convoSearch" placeholder="Buscar conversa..." oninput="renderConvoList()">
-      </div>
-      <div class="metrics-row">
-        <div class="metric-card">
-          <div class="metric-val" id="mConvos">0</div>
-          <div class="metric-lbl">Conversas</div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-val" id="mMsgs">0</div>
-          <div class="metric-lbl">Mensagens</div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-val" id="mPhotos">0</div>
-          <div class="metric-lbl">Fotos</div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-val" id="mAudios">0</div>
-          <div class="metric-lbl">Áudios</div>
-        </div>
-      </div>
-      <div class="convo-list" id="convoList"></div>
-    </div>
-
-    <div class="main">
-      <div class="panel-tabs">
-        <button class="panel-tab active" onclick="switchTab('msgs',this)">Mensagens</button>
-        <button class="panel-tab" onclick="switchTab('photos',this)">Fotos <span id="photoTabCount"></span></button>
-        <button class="panel-tab" onclick="switchTab('search',this)">Buscar</button>
-        <button class="panel-tab" onclick="switchTab('all-photos',this)">Todas as fotos</button>
-      </div>
-      <div class="panel-content" id="panelContent">
-        <div class="empty-state">
-          <div class="icon">💬</div>
-          <div>Selecione uma conversa</div>
-        </div>
-      </div>
-    </div>
+  <div class="search-wrap">
+    <input class="search-input" id="search-input" placeholder="Buscar por nome, username ou conteúdo de mensagem…" autocomplete="off">
   </div>
+  <div class="conv-list" id="conv-list"></div>
+  <button class="reset-btn" onclick="resetApp()">+ Carregar outra pasta</button>
 </div>
 
-<!-- LIGHTBOX -->
-<div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
-  <button class="lightbox-close" onclick="document.getElementById('lightbox').classList.remove('open')">✕</button>
-  <img id="lightboxImg" src="" alt="">
-  <div class="lightbox-info" id="lightboxInfo"></div>
+<!-- CHAT -->
+<div id="chat-screen">
+  <div class="chat-header">
+    <button class="back-btn" onclick="showList()">←</button>
+    <div class="chat-avatar" id="chat-avatar"></div>
+    <div class="chat-header-info">
+      <div class="chat-name" id="chat-title"></div>
+      <div class="chat-sub" id="chat-sub"></div>
+    </div>
+  </div>
+  <div class="chat-search-wrap">
+    <input class="chat-search-input" id="chat-search" placeholder="Buscar nesta conversa…" autocomplete="off">
+    <span class="chat-search-count" id="chat-search-count"></span>
+  </div>
+  <div class="messages" id="messages"></div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script>
-const $ = id => document.getElementById(id);
+const COLORS=['#7c6af7','#f76a8c','#6ab8f7','#f7b26a','#6af7b2','#f76af7','#a0f76a','#f76a6a']
+let conversations=[], myName='', activeConv=null
 
-let state = {
-  convos: [],
-  allPhotos: [],
-  myName: '',
-  currentFolder: null,
-  currentTab: 'msgs',
-  zipFiles: {}  // filename -> File object (kept for lazy photo loading)
-};
+function dec(s){if(!s)return '';try{return decodeURIComponent(escape(s))}catch{return s}}
+function fmtTs(ms){if(!ms)return '';const d=new Date(ms);return d.toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'})}
+function fmtDate(ms){if(!ms)return '';const d=new Date(ms);return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'})}
+function initials(n){return(n||'??').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2)}
+function colorFor(n){let h=0;for(let i=0;i<(n||'').length;i++)h=(h*31+n.charCodeAt(i))%COLORS.length;return COLORS[h]}
+function show(id){['upload-screen','loading-screen','list-screen','chat-screen'].forEach(s=>{const el=document.getElementById(s);el.style.display=s===id?(s==='list-screen'||s==='chat-screen'?'flex':'flex'):'none'})}
 
-// URL cache so we don't re-extract the same photo twice
-const urlCache = {};
-
-// ── PROGRESS ──
-function setProgress(pct, label) {
-  $('progressFill').style.width = pct + '%';
-  $('progressLabel').textContent = label;
-}
-
-// ── LAZY PHOTO LOADER ──
-// Reopens the zip on demand and extracts just the one file needed.
-// This avoids keeping 800MB in memory — only metadata is kept in state.
-async function loadPhotoUrl(uri) {
-  if (urlCache[uri]) return urlCache[uri];
-  // find which zip file contains this uri
-  const zipFile = state.zipFiles[uri];
-  if (!zipFile) return null;
-  try {
-    const zip = await JSZip.loadAsync(zipFile);
-    const entry = zip.files[uri];
-    if (!entry) return null;
-    const blob = await entry.async('blob');
-    const url = URL.createObjectURL(blob);
-    urlCache[uri] = url;
-    // free zip from memory immediately
-    return url;
-  } catch { return null; }
-}
-
-// ── LOAD ZIP ──
-// Strategy for large files: use JSZip in streaming mode.
-// We only keep JSON text in memory; photo entries store uri + which File they came from.
-async function processZip(file) {
-  $('progressWrap').style.display = 'block';
-  setProgress(5, 'Abrindo ' + file.name + ' (' + (file.size / 1024 / 1024).toFixed(0) + ' MB)...');
-
-  // For large files, use loadAsync with onUpdate callback for progress
-  let zip;
-  try {
-    zip = await JSZip.loadAsync(file, {
-      onUpdate: (meta) => {
-        if (meta.percent) setProgress(5 + Math.round(meta.percent * 0.3), 'Lendo arquivo... ' + Math.round(meta.percent) + '%');
-      }
-    });
-  } catch(e) {
-    setProgress(0, 'Erro ao abrir o arquivo. Tente um arquivo menor ou verifique se é um ZIP válido.');
-    return;
+async function handleFiles(fileList){
+  const files=Array.from(fileList).filter(f=>f.name.endsWith('.json')&&!['secret_conversations.json','your_chat_information.json'].includes(f.name))
+  if(!files.length){alert('Nenhum arquivo JSON encontrado.');return}
+  show('loading-screen')
+  
+  const byFolder={}
+  for(const f of files){
+    const parts=(f.webkitRelativePath||f.name).split('/')
+    const key=parts.length>=2?parts[parts.length-2]:'root'
+    if(!byFolder[key])byFolder[key]=[]
+    byFolder[key].push(f)
   }
 
-  setProgress(38, 'Mapeando conversas...');
+  const total=files.length
+  let done=0
+  const convList=[]
 
-  let msgFiles = Object.keys(zip.files).filter(f =>
-    f.includes('/messages/inbox/') && /message_\d+\.json$/.test(f)
-  );
-  const isHtml = msgFiles.length === 0;
-  if (isHtml) {
-    msgFiles = Object.keys(zip.files).filter(f =>
-      f.includes('/messages/inbox/') && /message_\d+\.html$/.test(f)
-    );
-  }
-
-  if (!msgFiles.length) {
-    setProgress(0, 'Nenhuma conversa encontrada. Verifique se é um export do Instagram.');
-    return;
-  }
-
-  // Map all photo URIs to this File so we can lazy-load later
-  Object.keys(zip.files).forEach(path => {
-    if (path.includes('/photos/') && !path.endsWith('/')) {
-      state.zipFiles[path] = file;
+  for(const [folder,ffiles] of Object.entries(byFolder)){
+    const parsed=[]
+    for(const f of ffiles){
+      try{const t=await f.text();parsed.push(JSON.parse(t))}catch{}
+      done++
+      document.getElementById('progress-fill').style.width=(done/total*100)+'%'
+      document.getElementById('loading-count').textContent=`${done} / ${total} arquivos`
     }
-  });
-
-  const newConvos = [];
-  const newPhotos = [];
-
-  for (let i = 0; i < msgFiles.length; i++) {
-    if (i % 10 === 0) {
-      setProgress(38 + Math.round((i / msgFiles.length) * 57),
-        `Conversa ${i + 1} de ${msgFiles.length}...`);
-      await new Promise(r => setTimeout(r, 0));
-    }
-    try {
-      const txt = await zip.files[msgFiles[i]].async('string');
-      const parts = msgFiles[i].split('/');
-      const folder = parts[parts.length - 2];
-      let participants = [], messages = [], photos = [], audioCount = 0;
-
-      if (!isHtml) {
-        const data = JSON.parse(txt);
-        participants = (data.participants || []).map(p => p.name || '?');
-        messages = data.messages || [];
-        if (!state.myName && messages.length > 2) {
-          const freq = {};
-          messages.forEach(m => { freq[m.sender_name] = (freq[m.sender_name] || 0) + 1; });
-          state.myName = Object.keys(freq).sort((a, b) => freq[b] - freq[a])[0];
-        }
-        for (const msg of messages) {
-          if (msg.photos) {
-            for (const ph of msg.photos) {
-              photos.push({ uri: ph.uri, sender: msg.sender_name, ts: msg.timestamp_ms });
-              newPhotos.push({ uri: ph.uri, sender: msg.sender_name, ts: msg.timestamp_ms, folder, participants });
-            }
-          }
-          if (msg.audio) audioCount++;
-        }
-      } else {
-        // HTML format — exact Instagram export structure:
-        // div.pam._a6-g = message block
-        // h2._a6-i = sender name  
-        // div._a6-p = content container (text in nested divs)
-        // div._a6-o = timestamp
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(txt, 'text/html');
-
-        // Title / participants from h1
-        const titleEl = doc.querySelector('h1');
-        if (titleEl) {
-          titleEl.textContent.split(',').map(s => s.trim()).filter(Boolean)
-            .forEach(n => { if (n && !participants.includes(n)) participants.push(n); });
-        }
-
-        // Each message block
-        doc.querySelectorAll('div._a6-g').forEach(msgEl => {
-          // Sender name
-          const senderEl = msgEl.querySelector('h2');
-          const sender = senderEl ? senderEl.textContent.trim() : '?';
-
-          // Timestamp
-          const timeEl = msgEl.querySelector('div._a6-o');
-          const tsText = timeEl ? timeEl.textContent.trim() : '';
-          // Instagram PT-BR format: "fev 27, 2026 2:10 da tarde/noite"
-          const ts = tsText ? parseInstagramDate(tsText) : 0;
-
-          // Content — text lives in nested divs inside ._a6-p
-          const contentEl = msgEl.querySelector('div._a6-p');
-          let content = '';
-          if (contentEl) {
-            // Walk all leaf text nodes
-            const walk = (el) => {
-              if (el.children.length === 0) return el.textContent.trim();
-              for (const child of el.children) {
-                const t = walk(child);
-                if (t) return t;
-              }
-              return '';
-            };
-            content = walk(contentEl);
-          }
-
-          // Photos
-          msgEl.querySelectorAll('img[src], a[href]').forEach(el => {
-            const src = el.getAttribute('src') || el.getAttribute('href') || '';
-            if (src.includes('photos/')) {
-              const uri = src.replace(/^\//, '');
-              state.zipFiles[uri] = file;
-              photos.push({ uri, sender, ts });
-              newPhotos.push({ uri, sender, ts, folder, participants });
-            }
-          });
-
-          if (msgEl.querySelector('audio')) audioCount++;
-
-          if (content || msgEl.querySelector('img') || msgEl.querySelector('audio')) {
-            messages.push({ sender_name: sender, content, timestamp_ms: ts });
-          }
-        });
-
-        if (!state.myName && participants.length) state.myName = participants[0];
-      }
-
-      newConvos.push({ folder, participants, messages, photos, audioCount });
-    } catch(e) {}
+    let msgs=[], title='', participants=[]
+    parsed.forEach(p=>{
+      if(p.messages)msgs=msgs.concat(p.messages)
+      if(!title&&p.title)title=dec(p.title)
+      if(p.participants&&!participants.length)participants=p.participants.map(x=>dec(x.name))
+    })
+    msgs.sort((a,b)=>a.timestamp_ms-b.timestamp_ms)
+    convList.push({folderName:folder,title:title||folder,participants,messages:msgs,msgCount:msgs.length})
   }
 
-  // Explicitly release the zip to free memory
-  zip = null;
+  convList.sort((a,b)=>{
+    const lA=a.messages[a.messages.length-1]?.timestamp_ms||0
+    const lB=b.messages[b.messages.length-1]?.timestamp_ms||0
+    return lB-lA
+  })
 
-  for (const nc of newConvos) {
-    if (!state.convos.find(c => c.folder === nc.folder)) state.convos.push(nc);
-  }
-  state.allPhotos = [...state.allPhotos, ...newPhotos].sort((a, b) => b.ts - a.ts);
-  state.convos.sort((a, b) => (b.messages[0]?.timestamp_ms || 0) - (a.messages[0]?.timestamp_ms || 0));
+  // guess my name
+  const sc={}
+  convList.forEach(c=>c.messages.forEach(m=>{const s=dec(m.sender_name||'');sc[s]=(sc[s]||0)+1}))
+  myName=Object.entries(sc).sort((a,b)=>b[1]-a[1])[0]?.[0]||''
 
-  setProgress(100, 'Pronto!');
-  setTimeout(showDashboard, 400);
+  conversations=convList
+  renderList(convList)
+  show('list-screen')
+  document.getElementById('list-meta').textContent=`${convList.length} conversas · ${myName}`
+  document.getElementById('search-input').focus()
 }
 
-function showDashboard() {
-  $('upload-view').style.display = 'none';
-  $('dashboard-view').style.display = 'block';
-  updateMetrics();
-  renderConvoList();
-}
-
-function updateMetrics() {
-  const totalMsgs = state.convos.reduce((s, c) => s + c.messages.length, 0);
-  const totalAudios = state.convos.reduce((s, c) => s + c.audioCount, 0);
-  $('mConvos').textContent = state.convos.length;
-  $('mMsgs').textContent = totalMsgs > 999 ? (totalMsgs / 1000).toFixed(1) + 'k' : totalMsgs;
-  $('mPhotos').textContent = state.allPhotos.length;
-  $('mAudios').textContent = totalAudios;
-  $('brandName').textContent = state.myName ? state.myName + ' — DMs' : 'DM Explorer';
-  $('brandSub').textContent = state.convos.length + ' conversas carregadas';
-}
-
-function renderConvoList() {
-  const q = ($('convoSearch')?.value || '').toLowerCase();
-  const filtered = state.convos.filter(c =>
-    !q || c.participants.join(' ').toLowerCase().includes(q)
-  );
-  $('convoList').innerHTML = filtered.slice(0, 120).map(c => {
-    const other = c.participants.filter(p => p !== state.myName);
-    const name = other.length ? other.join(', ') : (c.participants[0] || '?');
-    const initials = name.split(' ').slice(0, 2).map(w => w[0] || '').join('').toUpperCase();
-    const last = c.messages[0];
-    const preview = last ? (last.content || '[mídia]').substring(0, 45) : '';
-    const date = last ? fmtDate(last.timestamp_ms) : '';
-    const isActive = c.folder === state.currentFolder;
-    return `<div class="convo-item${isActive ? ' active' : ''}" onclick="openConvo('${c.folder}')">
-      <div class="avatar">${initials}</div>
-      <div class="convo-info">
-        <div class="convo-name">${esc(name)}</div>
-        <div class="convo-preview">${esc(preview)}</div>
+function renderList(list){
+  const el=document.getElementById('conv-list')
+  if(!list.length){el.innerHTML='<div class="empty">Nenhuma conversa encontrada.</div>';return}
+  el.innerHTML=list.map((c,i)=>{
+    const color=colorFor(c.title)
+    const last=c.messages[c.messages.length-1]
+    const lastTxt=getLastMsg(c)
+    const time=last?fmtTs(last.timestamp_ms).split(' ')[0]:''
+    return `<div class="conv-item" onclick="openConv(${i}_list_idx)">
+      <div class="conv-avatar" style="background:${color}22;color:${color};border-color:${color}44">${initials(c.title)}</div>
+      <div class="conv-info">
+        <div class="conv-name">${esc(c.title)}</div>
+        <div class="conv-last">${esc(lastTxt)}</div>
+        <span class="folder-badge">${esc(c.folderName)}</span>
       </div>
-      <div class="convo-meta">
-        <span style="font-size:10px;font-family:var(--mono);color:var(--muted)">${date}</span>
-        ${c.photos.length ? `<span class="badge badge-photo">${c.photos.length} fotos</span>` : ''}
+      <div class="conv-right">
+        <div class="conv-time">${time}</div>
+        <div class="conv-count">${c.msgCount}</div>
       </div>
-    </div>`;
-  }).join('') || '<div class="empty-state" style="min-height:80px"><div>Nenhuma conversa</div></div>';
+    </div>`
+  }).join('').replace(/_list_idx/g,'').replace(/onclick="openConv\((\d+)\)"/g,(_,i)=>`onclick="openConvByIndex(${i})"`)
+  // fix indices
+  el.querySelectorAll('.conv-item').forEach((el,i)=>el.onclick=()=>openConvByIndex(i))
 }
 
-// ── OPEN CONVO ──
-function openConvo(folder) {
-  state.currentFolder = folder;
-  state.currentTab = 'msgs';
-  renderConvoList();
-  const c = state.convos.find(x => x.folder === folder);
-  if (!c) return;
-  // update tab label
-  $('photoTabCount').textContent = c.photos.length ? `(${c.photos.length})` : '';
-  // activate msgs tab
-  document.querySelectorAll('.panel-tab').forEach((t,i) => t.classList.toggle('active', i===0));
-  renderMessages(c);
+// maintain filtered list reference
+let filteredList=[]
+function renderListFromFiltered(list){filteredList=list;renderList(list)}
+
+function openConvByIndex(i){openConv(filteredList[i]||conversations[i])}
+
+function getLastMsg(c){
+  const m=c.messages[c.messages.length-1]
+  if(!m)return ''
+  const t=dec(m.content||'')
+  if(t)return t.slice(0,60)+(t.length>60?'…':'')
+  if(m.photos)return '📷 Foto'
+  if(m.audio_files)return '🎤 Áudio'
+  if(m.videos)return '🎥 Vídeo'
+  if(m.share?.link)return '🔗 Link'
+  return '📎 Mídia'
 }
 
-function renderMessages(c) {
-  const msgs = [...c.messages].reverse();
-  let html = '<div class="msg-list" id="msgList">';
-  let lastDate = '';
-  for (const m of msgs.slice(-80)) {
-    const d = fmtDateFull(m.timestamp_ms);
-    if (d !== lastDate) {
-      html += `<div class="msg-date-sep">${d}</div>`;
-      lastDate = d;
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+
+function openConv(conv){
+  activeConv=conv
+  const color=colorFor(conv.title)
+  document.getElementById('chat-avatar').textContent=initials(conv.title)
+  document.getElementById('chat-avatar').style.cssText=`width:36px;height:36px;border-radius:50%;border:1.5px solid ${color}44;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;background:${color}22;color:${color}`
+  document.getElementById('chat-title').textContent=conv.title
+  document.getElementById('chat-sub').textContent=`${conv.msgCount} mensagens · ${conv.folderName}`
+  document.getElementById('chat-search').value=''
+  document.getElementById('chat-search-count').textContent=''
+  renderMessages(conv.messages,'')
+  show('chat-screen')
+  setTimeout(()=>{const m=document.getElementById('messages');m.scrollTop=m.scrollHeight},50)
+}
+
+function renderMessages(msgs, filter){
+  const wrap=document.getElementById('messages')
+  const q=filter.toLowerCase()
+  const list=q?msgs.filter(m=>dec(m.content||'').toLowerCase().includes(q)||dec(m.sender_name||'').toLowerCase().includes(q)):msgs
+  
+  if(!list.length){wrap.innerHTML='<div class="empty">Nenhuma mensagem encontrada.</div>';return}
+
+  let html='', prevDate='', prevSender=''
+  list.forEach((m,i)=>{
+    const sender=dec(m.sender_name||'')
+    const isMe=sender===myName
+    const side=isMe?'msg-me':'msg-them'
+    const time=fmtTs(m.timestamp_ms)
+    const date=fmtDate(m.timestamp_ms)
+    
+    if(date!==prevDate){
+      html+=`<div class="date-divider">${date}</div>`
+      prevDate=date
     }
-    const isMe = m.sender_name === state.myName;
-    const cls = isMe ? 'me' : 'other';
-    html += `<div class="msg-row ${cls}">`;
-    if (m.content) {
-      html += `<div class="bubble ${cls}">${esc(m.content)}</div>`;
-    }
-    if (m.photos) {
-      m.photos.forEach(() => {
-        html += `<div class="bubble-media ${cls}">[foto]</div>`;
-      });
-    }
-    if (m.audio) {
-      html += `<div class="bubble-media ${cls}">[áudio]</div>`;
-    }
-    if (m.videos) {
-      m.videos.forEach(() => {
-        html += `<div class="bubble-media ${cls}">[vídeo]</div>`;
-      });
-    }
-    html += `<div class="bubble-meta">${fmtTime(m.timestamp_ms)}</div>`;
-    html += '</div>';
-  }
-  if (msgs.length > 80) {
-    html += `<div class="msg-date-sep">... mais ${msgs.length - 80} mensagens anteriores</div>`;
-  }
-  html += '</div>';
-  $('panelContent').innerHTML = html;
-  const ml = $('msgList');
-  if (ml) ml.scrollTop = ml.scrollHeight;
-}
 
-// ── TABS ──
-function switchTab(tab, btn) {
-  document.querySelectorAll('.panel-tab').forEach(t => t.classList.remove('active'));
-  btn.classList.add('active');
-  state.currentTab = tab;
+    let txt=dec(m.content||'')
+    let contentHtml=''
+    if(txt){
+      if(q){txt=txt.replace(new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'),'<mark class="highlight">$1</mark>')}
+      contentHtml=`<span class="bubble-text">${esc(txt).replace(/&lt;mark class=&quot;highlight&quot;&gt;/g,'<mark class="highlight">').replace(/&lt;\/mark&gt;/g,'</mark>')}</span>`
+    } else if(m.photos?.length){contentHtml='<span class="media-tag">📷 Foto</span>'}
+    else if(m.audio_files?.length){contentHtml='<span class="media-tag">🎤 Áudio</span>'}
+    else if(m.videos?.length){contentHtml='<span class="media-tag">🎥 Vídeo</span>'}
+    else if(m.share?.link){contentHtml=`<span class="media-tag">🔗 ${esc(m.share.link).slice(0,50)}</span>`}
+    else{contentHtml='<span class="media-tag">📎 Mídia</span>'}
 
-  if (tab === 'msgs') {
-    const c = state.convos.find(x => x.folder === state.currentFolder);
-    if (c) renderMessages(c);
-    else $('panelContent').innerHTML = '<div class="empty-state"><div class="icon">💬</div><div>Selecione uma conversa</div></div>';
-  } else if (tab === 'photos') {
-    renderConvoPhotos();
-  } else if (tab === 'search') {
-    renderSearch();
-  } else if (tab === 'all-photos') {
-    renderAllPhotos();
+    const showSender=!isMe&&sender!==prevSender
+    html+=`<div class="msg-row ${side}">
+      ${showSender?`<div class="msg-sender">${esc(sender)}</div>`:''}
+      <div class="bubble">${contentHtml}<span class="msg-time">${time.split(' ')[1]||''}</span></div>
+    </div>`
+    prevSender=sender
+  })
+  wrap.innerHTML=html
+  
+  if(q){
+    const cnt=document.getElementById('chat-search-count')
+    cnt.textContent=`${list.length} resultado${list.length!==1?'s':''}`
+    const first=wrap.querySelector('.highlight')
+    if(first)first.scrollIntoView({block:'center'})
+  } else {
+    wrap.scrollTop=wrap.scrollHeight
   }
 }
 
-async function renderConvoPhotos() {
-  const c = state.convos.find(x => x.folder === state.currentFolder);
-  if (!c || !c.photos.length) {
-    $('panelContent').innerHTML = '<div class="empty-state"><div class="icon">📷</div><div>Nenhuma foto nesta conversa</div></div>';
-    return;
-  }
-  $('panelContent').innerHTML = '';
-  const grid = document.createElement('div');
-  grid.className = 'photo-grid';
-  $('panelContent').appendChild(grid);
-  for (const ph of c.photos) {
-    const wrapper = document.createElement('div');
-    const img = document.createElement('img');
-    img.className = 'photo-thumb';
-    img.style.background = 'var(--surface2)';
-    img.style.minHeight = '80px';
-    const info = document.createElement('div');
-    info.className = 'photo-info';
-    info.textContent = ph.sender;
-    wrapper.appendChild(img);
-    wrapper.appendChild(info);
-    grid.appendChild(wrapper);
-    loadPhotoUrl(ph.uri).then(url => {
-      if (url) {
-        img.src = url;
-        img.onclick = () => openLightbox(url, esc(ph.sender) + ' · ' + fmtDate(ph.ts));
-      } else {
-        wrapper.style.display = 'none';
-      }
-    });
-  }
+function showList(){show('list-screen')}
+
+function resetApp(){
+  conversations=[]
+  filteredList=[]
+  activeConv=null
+  document.getElementById('search-input').value=''
+  document.getElementById('conv-list').innerHTML=''
+  show('upload-screen')
 }
 
-async function renderAllPhotos() {
-  $('panelContent').innerHTML = '';
-  const photos = state.allPhotos.slice(0, 200);
-  const meta = document.createElement('p');
-  meta.style.cssText = 'font-size:11px;font-family:var(--mono);color:var(--muted);margin-bottom:12px';
-  meta.textContent = `${photos.length} de ${state.allPhotos.length} fotos (carregando...)`;
-  $('panelContent').appendChild(meta);
-  const grid = document.createElement('div');
-  grid.className = 'photo-grid';
-  $('panelContent').appendChild(grid);
-  let loaded = 0;
-  for (const ph of photos) {
-    const wrapper = document.createElement('div');
-    const img = document.createElement('img');
-    img.className = 'photo-thumb';
-    img.style.background = 'var(--surface2)';
-    img.style.minHeight = '80px';
-    const info = document.createElement('div');
-    info.className = 'photo-info';
-    info.textContent = (ph.sender || '') + ' · ' + fmtDate(ph.ts);
-    wrapper.appendChild(img);
-    wrapper.appendChild(info);
-    grid.appendChild(wrapper);
-    loadPhotoUrl(ph.uri).then(url => {
-      if (url) {
-        img.src = url;
-        const d = fmtDate(ph.ts);
-        img.onclick = () => openLightbox(url, esc(ph.sender) + ' · ' + d);
-        loaded++;
-        meta.textContent = `${loaded} de ${photos.length} fotos carregadas`;
-      } else {
-        wrapper.style.display = 'none';
-      }
-    });
-  }
-}
+// Search list
+document.getElementById('search-input').addEventListener('input',function(){
+  const q=this.value.toLowerCase()
+  if(!q){renderListFromFiltered(conversations);return}
+  const f=conversations.filter(c=>
+    c.title.toLowerCase().includes(q)||
+    c.folderName.toLowerCase().includes(q)||
+    c.participants.some(p=>p.toLowerCase().includes(q))||
+    c.messages.some(m=>dec(m.content||'').toLowerCase().includes(q))
+  )
+  renderListFromFiltered(f)
+  document.getElementById('list-meta').textContent=`${f.length} de ${conversations.length} conversas`
+})
 
-function renderSearch() {
-  $('panelContent').innerHTML = `
-    <input class="search-input" type="text" id="globalSearch" placeholder="Buscar em todas as mensagens..." oninput="doSearch()" style="width:100%;margin-bottom:1rem">
-    <div id="searchOut"></div>`;
-}
+// Search chat
+document.getElementById('chat-search').addEventListener('input',function(){
+  if(activeConv)renderMessages(activeConv.messages,this.value)
+})
 
-function doSearch() {
-  const q = ($('globalSearch')?.value || '').toLowerCase().trim();
-  const out = $('searchOut');
-  if (!out) return;
-  if (q.length < 2) { out.innerHTML = ''; return; }
-  const results = [];
-  for (const c of state.convos) {
-    const other = c.participants.filter(p => p !== state.myName);
-    const name = other.length ? other.join(', ') : (c.participants[0] || '?');
-    for (const m of c.messages) {
-      if ((m.content || '').toLowerCase().includes(q)) {
-        results.push({ msg: m, name, folder: c.folder });
-        if (results.length >= 60) break;
-      }
-    }
-    if (results.length >= 60) break;
-  }
-  if (!results.length) { out.innerHTML = '<div class="empty-state" style="min-height:80px"><div>Sem resultados</div></div>'; return; }
-  out.innerHTML = `<p style="font-size:11px;font-family:var(--mono);color:var(--muted);margin-bottom:10px">${results.length} resultado(s)</p>` +
-    results.map(r => `
-      <div class="search-result" onclick="openConvo('${r.folder}')">
-        <div class="search-result-meta">${esc(r.name)} · ${fmtDateFull(r.msg.timestamp_ms)}</div>
-        <div class="search-result-text">${highlight(r.msg.content || '', q)}</div>
-      </div>`).join('');
-}
+// Drop zone
+const dz=document.getElementById('drop-zone')
+dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('drag-over')})
+dz.addEventListener('dragleave',()=>dz.classList.remove('drag-over'))
+dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('drag-over');if(e.dataTransfer.files.length)handleFiles(e.dataTransfer.files)})
 
-// ── LIGHTBOX ──
-function openLightbox(url, info) {
-  $('lightboxImg').src = url;
-  $('lightboxInfo').textContent = info;
-  $('lightbox').classList.add('open');
-}
-function closeLightbox(e) {
-  if (e.target === $('lightbox')) $('lightbox').classList.remove('open');
-}
+document.getElementById('folder-input').addEventListener('change',e=>handleFiles(e.target.files))
+document.getElementById('files-input').addEventListener('change',e=>handleFiles(e.target.files))
 
-// ── RESET ──
-function resetApp() {
-  Object.values(urlCache).forEach(url => URL.revokeObjectURL(url));
-  Object.keys(urlCache).forEach(k => delete urlCache[k]);
-  state = { convos: [], allPhotos: [], myName: '', currentFolder: null, currentTab: 'msgs', zipFiles: {} };
-  $('dashboard-view').style.display = 'none';
-  $('upload-view').style.display = 'flex';
-  $('progressWrap').style.display = 'none';
-  $('fileInput').value = '';
-}
-
-// ── HELPERS ──
-// Parse Instagram PT-BR date: "fev 27, 2026 2:10 da tarde/noite"
-function parseInstagramDate(str) {
-  if (!str) return 0;
-  const months = {jan:0,fev:1,mar:2,abr:3,mai:4,jun:5,jul:6,ago:7,set:8,out:9,nov:10,dez:11};
-  const m = str.match(/(\w+)\s+(\d+),\s+(\d+)\s+(\d+):(\d+)\s+(da manhã|da tarde\/noite|da tarde|da noite)?/i);
-  if (!m) return new Date(str).getTime() || 0;
-  const mon = months[m[1].toLowerCase()] ?? 0;
-  let hr = parseInt(m[4]);
-  const min = parseInt(m[5]);
-  const period = (m[6] || '').toLowerCase();
-  if ((period.includes('tarde') || period.includes('noite')) && hr < 12) hr += 12;
-  if (period.includes('manhã') && hr === 12) hr = 0;
-  return new Date(parseInt(m[3]), mon, parseInt(m[2]), hr, min).getTime();
-}
-function esc(s) {
-  return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-function highlight(text, q) {
-  return esc(text).replace(new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'), 'gi'),
-    m => `<mark>${m}</mark>`);
-}
-function fmtDate(ts) {
-  if (!ts) return '';
-  return new Date(ts).toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit', year:'2-digit' });
-}
-function fmtDateFull(ts) {
-  if (!ts) return '';
-  return new Date(ts).toLocaleDateString('pt-BR', { day:'2-digit', month:'short', year:'numeric' });
-}
-function fmtTime(ts) {
-  if (!ts) return '';
-  return new Date(ts).toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
-}
-
-// ── DRAG & DROP ──
-const dz = $('dropZone');
-dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('over'); });
-dz.addEventListener('dragleave', () => dz.classList.remove('over'));
-dz.addEventListener('drop', e => {
-  e.preventDefault(); dz.classList.remove('over');
-  [...e.dataTransfer.files].filter(f => f.name.endsWith('.zip')).forEach(processZip);
-});
-
-$('fileInput').addEventListener('change', e => {
-  [...e.target.files].forEach(processZip);
-});
-$('fileInput2').addEventListener('change', e => {
-  [...e.target.files].forEach(f => processZip(f).then(updateMetrics).then(renderConvoList));
-});
-
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') $('lightbox').classList.remove('open');
-});
+// Init
+filteredList=conversations
+show('upload-screen')
 </script>
 </body>
 </html>
