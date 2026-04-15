@@ -823,19 +823,142 @@ function resetApp(){
   show('upload-screen')
 }
 
-// List search
+// List search — shows conversation list OR snippet results depending on query
+let searchTimer=null
 document.getElementById('search-input').addEventListener('input',function(){
-  const q=this.value.toLowerCase()
-  if(!q){renderList(conversations);document.getElementById('list-meta').textContent=`${conversations.length} conversas · ${myName}`;return}
-  const f=conversations.filter(c=>
-    c.title.toLowerCase().includes(q)||
-    c.folderName.toLowerCase().includes(q)||
-    c.participants.some(p=>p.toLowerCase().includes(q))||
-    c.messages.some(m=>dec(m.content||'').toLowerCase().includes(q))
-  )
-  renderList(f)
-  document.getElementById('list-meta').textContent=`${f.length} de ${conversations.length} conversas`
+  clearTimeout(searchTimer)
+  const q=this.value.trim()
+  if(!q){
+    renderList(conversations)
+    document.getElementById('list-meta').textContent=`${conversations.length} conversas · ${myName}`
+    return
+  }
+  searchTimer=setTimeout(()=>renderSearchResults(q),250)
 })
+
+function renderSearchResults(q){
+  const ql=q.toLowerCase()
+  const el=document.getElementById('conv-list')
+  filteredList=[]
+  el.innerHTML=''
+
+  // Collect: for each conversation, find all matching messages (up to 3 snippets shown)
+  const results=[] // {conv, matchMsgs:[]}
+  conversations.forEach(c=>{
+    const nameMatch=c.title.toLowerCase().includes(ql)||c.participants.some(p=>p.toLowerCase().includes(ql))
+    const matchMsgs=c.messages.filter(m=>dec(m.content||'').toLowerCase().includes(ql))
+    if(nameMatch||matchMsgs.length){
+      results.push({conv:c,matchMsgs,nameMatch})
+      filteredList.push(c)
+    }
+  })
+
+  const totalSnippets=results.reduce((s,r)=>s+r.matchMsgs.length,0)
+  document.getElementById('list-meta').textContent=`${results.length} conversas · ${totalSnippets} trechos`
+
+  if(!results.length){
+    el.innerHTML='<div class="empty">Nenhum resultado para "'+esc(q)+'"</div>'
+    return
+  }
+
+  results.forEach(({conv,matchMsgs,nameMatch})=>{
+    const color=colorFor(conv.title)
+    const wrapper=document.createElement('div')
+    wrapper.style.cssText='border-bottom:1px solid var(--border)'
+
+    // Conv header row
+    const header=document.createElement('div')
+    header.className='conv-item'
+    header.style.borderBottom='none'
+    const badgeHtml=matchMsgs.length?`<span style="font-size:10px;font-family:'DM Mono',monospace;background:var(--surface2);color:var(--accent2);padding:1px 7px;border-radius:20px">${matchMsgs.length} trecho${matchMsgs.length!==1?'s':''}</span>`:''
+    header.innerHTML=`
+      <div class="conv-avatar" style="background:${color}22;color:${color};border-color:${color}44">${initials(conv.title)}</div>
+      <div class="conv-info">
+        <div class="conv-name">${esc(conv.title)}</div>
+        <div class="conv-media-badges">${badgeHtml}</div>
+      </div>
+      <div class="conv-right">
+        <div class="conv-time">${conv.messages.length?fmtTs(conv.messages[conv.messages.length-1].timestamp_ms).split(' ')[0]:''}</div>
+      </div>`
+    header.onclick=()=>openConvAtSearch(conv,q)
+    wrapper.appendChild(header)
+
+    // Snippet rows (max 4)
+    const shown=matchMsgs.slice(-20).reverse().slice(0,4)
+    shown.forEach(m=>{
+      const sender=dec(m.sender_name||'')
+      const isMe=sender===myName
+      const txt=dec(m.content||'')
+      const time=fmtTs(m.timestamp_ms)
+
+      // Build highlighted snippet — show 40 chars before/after match
+      const idx=txt.toLowerCase().indexOf(ql)
+      const start=Math.max(0,idx-40)
+      const end=Math.min(txt.length,idx+ql.length+40)
+      let snippet=(start>0?'…':'')+txt.slice(start,end)+(end<txt.length?'…':'')
+      const re=new RegExp('('+ql.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi')
+      const snippetHtml=esc(snippet).replace(re,'<mark style="background:rgba(247,178,106,.35);color:var(--accent);border-radius:2px;padding:0 2px">$1</mark>')
+
+      const row=document.createElement('div')
+      row.style.cssText=`display:flex;gap:10px;padding:6px 16px 6px 76px;cursor:pointer;transition:background .1s;align-items:flex-start`
+      row.onmouseover=()=>row.style.background='var(--surface)'
+      row.onmouseout=()=>row.style.background=''
+      row.innerHTML=`
+        <div style="flex:1;min-width:0">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:2px;font-family:'DM Mono',monospace">${isMe?'Você':esc(sender)} · ${time}</div>
+          <div style="font-size:13px;line-height:1.5;color:var(--text)">${snippetHtml}</div>
+        </div>`
+      row.onclick=()=>openConvAtSearch(conv,q,m.timestamp_ms)
+      wrapper.appendChild(row)
+    })
+
+    if(matchMsgs.length>4){
+      const more=document.createElement('div')
+      more.style.cssText='padding:4px 16px 8px 76px;font-size:11px;color:var(--muted);font-family:"DM Mono",monospace;cursor:pointer'
+      more.textContent=`+ ${matchMsgs.length-4} trechos a mais — clique para ver todos`
+      more.onclick=()=>openConvAtSearch(conv,q)
+      wrapper.appendChild(more)
+    }
+
+    el.appendChild(wrapper)
+  })
+}
+
+function openConvAtSearch(conv, q, targetTs){
+  openConv(conv)
+  // Pre-fill chat search and scroll to target
+  setTimeout(()=>{
+    const input=document.getElementById('chat-search')
+    input.value=q
+    renderMessages(conv.messages,q)
+    // If specific timestamp, scroll to that highlight
+    if(targetTs){
+      setTimeout(()=>{
+        const marks=document.querySelectorAll('#messages mark.hl')
+        // Find the one closest in DOM order to the target message
+        // We approximate by finding the nth match corresponding to the message index
+        const msgIdx=conv.messages.findIndex(m=>m.timestamp_ms===targetTs)
+        // Count how many highlights are before this message
+        let hlsBefore=0
+        const allMsgs=document.getElementById('messages')
+        const rows=allMsgs.querySelectorAll('.msg-row')
+        let found=false
+        rows.forEach((row,ri)=>{
+          if(found)return
+          const marksInRow=row.querySelectorAll('mark.hl')
+          if(ri===msgIdx&&marksInRow.length){
+            activateHL(hlsBefore)
+            found=true
+          }
+          hlsBefore+=marksInRow.length
+        })
+        if(!found&&marks.length)activateHL(0)
+      },80)
+    } else if(hlMatches.length){
+      activateHL(0)
+    }
+  },50)
+}
 
 // Chat search
 let chatTimer=null
