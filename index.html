@@ -130,6 +130,43 @@ mark.hl.hl-active{background:var(--hl-active-bg);color:#fff}
 .audio-meta{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace}
 .no-media{padding:3rem;text-align:center;color:var(--muted);font-size:14px;grid-column:1/-1}
 
+/* GALLERY SCREEN */
+#gallery-screen{display:none;flex-direction:column;height:100vh;max-width:680px;margin:0 auto;width:100%}
+.gallery-tabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0}
+.gtab{flex:1;padding:11px;text-align:center;font-size:13px;font-weight:600;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;transition:color .15s,border-color .15s}
+.gtab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.gallery-list-btn{background:none;border:none;color:var(--accent2);font-size:13px;font-weight:600;cursor:pointer;padding:0;text-align:left;font-family:inherit}
+.gallery-list-btn:hover{color:var(--accent)}
+.year-section{margin:0}
+.year-header{padding:10px 16px 6px;font-size:13px;font-weight:700;color:var(--muted);font-family:'DM Mono',monospace;background:var(--bg);position:sticky;top:0;z-index:2;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.year-count{font-size:11px;font-weight:400;color:var(--muted);opacity:.7}
+.conv-section{margin:0}
+.conv-section-header{padding:8px 16px 6px;display:flex;align-items:center;gap:8px;cursor:pointer;transition:background .1s}
+.conv-section-header:hover{background:var(--surface)}
+.conv-section-avatar{width:28px;height:28px;border-radius:50%;border:1px solid;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0}
+.conv-section-name{font-size:13px;font-weight:600;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.conv-section-count{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;flex-shrink:0}
+.conv-section-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;padding:0 3px 8px}
+.conv-section-grid.collapsed{display:none}
+
+/* GALLERY SCREEN */
+#gallery-screen{display:none;flex-direction:column;height:100vh;max-width:680px;margin:0 auto;width:100%}
+#gallery-content{flex:1;overflow-y:auto}
+.gallery-tabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0}
+.gtab{flex:1;padding:11px;text-align:center;font-size:13px;font-weight:600;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;transition:color .15s,border-color .15s}
+.gtab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.year-section{margin:0}
+.year-header{padding:10px 16px 6px;font-size:12px;font-weight:700;color:var(--muted);font-family:'DM Mono',monospace;background:var(--bg);position:sticky;top:0;z-index:2;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;letter-spacing:.06em;text-transform:uppercase}
+.year-count{font-size:11px;font-weight:400;opacity:.6}
+.conv-section{}
+.conv-section-header{padding:8px 14px 6px;display:flex;align-items:center;gap:8px;cursor:pointer;transition:background .1s;border-bottom:1px solid var(--border)}
+.conv-section-header:hover{background:var(--surface)}
+.conv-section-avatar{width:26px;height:26px;border-radius:50%;border:1px solid;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0}
+.conv-section-name{font-size:13px;font-weight:600;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.conv-section-count{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;flex-shrink:0}
+.conv-section-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;padding:3px 3px 6px}
+.conv-section-grid.collapsed{display:none}
+
 /* LIGHTBOX */
 #lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.96);z-index:999;flex-direction:column;align-items:center;justify-content:center;gap:12px}
 #lightbox.open{display:flex}
@@ -179,7 +216,10 @@ mark.hl.hl-active{background:var(--hl-active-bg);color:#fff}
 <div id="list-screen">
   <div class="list-header">
     <div class="logo">DM<span>explorer</span></div>
-    <div class="list-meta" id="list-meta"></div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <button class="upload-btn" style="padding:5px 12px;font-size:12px" onclick="openGallery()">🖼 Galeria</button>
+      <div class="list-meta" id="list-meta"></div>
+    </div>
   </div>
   <div class="search-wrap">
     <input class="search-input" id="search-input" placeholder="Buscar por nome, username ou conteúdo de mensagem…" autocomplete="off">
@@ -219,6 +259,20 @@ mark.hl.hl-active{background:var(--hl-active-bg);color:#fff}
     <div class="media-filter-bar" id="media-filter-bar"></div>
     <div class="media-grid" id="media-grid"></div>
   </div>
+</div>
+
+<!-- GALLERY -->
+<div id="gallery-screen">
+  <div class="list-header">
+    <button class="back-btn" onclick="showList()">←</button>
+    <div class="logo" style="margin-left:4px">DM<span>explorer</span></div>
+    <div class="list-meta" id="gallery-meta"></div>
+  </div>
+  <div class="gallery-tabs">
+    <div class="gtab active" id="gtab-photos" onclick="switchGalleryType('photos')">📷 Fotos</div>
+    <div class="gtab" id="gtab-videos" onclick="switchGalleryType('videos')">🎥 Vídeos</div>
+  </div>
+  <div id="gallery-content"></div>
 </div>
 
 <!-- LIGHTBOX -->
@@ -284,7 +338,7 @@ function findFile(uri){
 }
 
 function show(id){
-  ['upload-screen','loading-screen','list-screen','chat-screen'].forEach(s=>{
+  ['upload-screen','loading-screen','list-screen','chat-screen','gallery-screen'].forEach(s=>{
     document.getElementById(s).style.display=s===id?'flex':'none'
   })
 }
@@ -639,6 +693,128 @@ function updateNavBtns(){
 }
 
 function showList(){show('list-screen')}
+
+// ─── GALLERY ───────────────────────────────────────────────
+let galleryType='photos' // photos | videos
+let galleryLbItems=[], galleryCollapsed={}
+
+function openGallery(){
+  galleryType='photos'
+  document.getElementById('gtab-photos').className='gtab active'
+  document.getElementById('gtab-videos').className='gtab'
+  show('gallery-screen')
+  renderGallery()
+}
+
+function switchGalleryType(t){
+  galleryType=t
+  document.getElementById('gtab-photos').className='gtab'+(t==='photos'?' active':'')
+  document.getElementById('gtab-videos').className='gtab'+(t==='videos'?' active':'')
+  renderGallery()
+}
+
+function renderGallery(){
+  const content=document.getElementById('gallery-content')
+  content.innerHTML='<div style="padding:2rem;text-align:center;color:var(--muted);font-size:13px">Organizando mídia…</div>'
+
+  // Collect all items of the given type across all conversations
+  const items=[] // {type, uri, ts, sender, convTitle, convFolder}
+  conversations.forEach(c=>{
+    c.messages.forEach(m=>{
+      const sender=dec(m.sender_name||'')
+      const ts=m.timestamp_ms
+      if(galleryType==='photos'&&m.photos?.length){
+        m.photos.forEach(p=>items.push({type:'photo',uri:p.uri,ts:p.creation_timestamp?p.creation_timestamp*1000:ts,sender,convTitle:c.title,convFolder:c.folderName}))
+      }
+      if(galleryType==='videos'&&m.videos?.length){
+        m.videos.forEach(v=>items.push({type:'video',uri:v.uri,ts:v.creation_timestamp?v.creation_timestamp*1000:ts,sender,convTitle:c.title,convFolder:c.folderName}))
+      }
+    })
+  })
+
+  const total=items.length
+  document.getElementById('gallery-meta').textContent=`${total} ${galleryType==='photos'?'fotos':'vídeos'}`
+
+  if(!total){
+    content.innerHTML=`<div style="padding:3rem;text-align:center;color:var(--muted);font-size:14px">Nenhum ${galleryType==='photos'?'foto':'vídeo'} encontrado.<br><span style="font-size:12px;opacity:.6">Carregue a pasta inbox inteira para ver as mídias.</span></div>`
+    return
+  }
+
+  // Group by year → conversation
+  const byYear={} // year -> { convFolder -> {title, items[]} }
+  items.forEach(item=>{
+    const year=item.ts?new Date(item.ts).getFullYear():'?'
+    if(!byYear[year])byYear[year]={}
+    const cf=item.convFolder
+    if(!byYear[year][cf])byYear[year][cf]={title:item.convTitle,items:[]}
+    byYear[year][cf].items.push(item)
+  })
+
+  // Build galleryLbItems flat list (for lightbox nav)
+  galleryLbItems=items.filter(i=>findFile(i.uri))
+
+  const years=Object.keys(byYear).sort((a,b)=>b-a)
+  let html=''
+  years.forEach(year=>{
+    const convs=byYear[year]
+    const yearTotal=Object.values(convs).reduce((s,c)=>s+c.items.length,0)
+    html+=`<div class="year-section"><div class="year-header"><span>${year}</span><span class="year-count">${yearTotal} item${yearTotal!==1?'s':''}</span></div>`
+    Object.entries(convs).forEach(([folder,cv])=>{
+      const color=colorFor(cv.title)
+      const colKey=`${year}__${folder}`
+      const isCollapsed=galleryCollapsed[colKey]
+      html+=`<div class="conv-section">
+        <div class="conv-section-header" onclick="toggleConvSection('${colKey}')">
+          <div class="conv-section-avatar" style="background:${color}22;color:${color};border-color:${color}44">${initials(cv.title)}</div>
+          <div class="conv-section-name">${esc(cv.title)}</div>
+          <div class="conv-section-count">${cv.items.length} ${galleryType==='photos'?'📷':'🎥'} ${isCollapsed?'▸':'▾'}</div>
+        </div>
+        <div class="conv-section-grid${isCollapsed?' collapsed':''}" id="csg_${colKey.replace(/[^a-zA-Z0-9]/g,'_')}">`
+      cv.items.forEach(item=>{
+        const file=findFile(item.uri)
+        const gbIdx=galleryLbItems.indexOf(item)
+        const name=(item.uri||'').split('/').pop()
+        if(file){
+          const url=URL.createObjectURL(file)
+          if(galleryType==='photos'){
+            html+=`<div class="media-item" onclick="openGalleryLb(${gbIdx})"><img src="${url}" loading="lazy" alt=""><div class="media-overlay"><span class="media-date">${fmtDate(item.ts)}</span></div></div>`
+          } else {
+            html+=`<div class="media-item" onclick="openGalleryLb(${gbIdx})"><video src="${url}" muted playsinline></video><div class="media-overlay"><span class="media-date">${fmtDate(item.ts)}</span></div><div class="media-type-icon" style="font-size:22px">▶</div></div>`
+          }
+        } else {
+          html+=`<div class="media-item" style="cursor:default"><div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:2px;padding:6px"><div style="font-size:18px;opacity:.25">${galleryType==='photos'?'📷':'🎥'}</div><div style="font-size:8px;color:var(--muted);text-align:center;font-family:'DM Mono',monospace;word-break:break-all">${esc(name.slice(0,20))}</div></div></div>`
+        }
+      })
+      html+=`</div></div>`
+    })
+    html+=`</div>`
+  })
+
+  content.innerHTML=html
+}
+
+function toggleConvSection(key){
+  galleryCollapsed[key]=!galleryCollapsed[key]
+  renderGallery()
+}
+
+function openGalleryLb(idx){
+  if(idx<0||idx>=galleryLbItems.length)return
+  lbCurrent=idx
+  lbItems=galleryLbItems
+  const item=galleryLbItems[idx]
+  const file=findFile(item.uri)
+  if(!file)return
+  const url=URL.createObjectURL(file)
+  const img=document.getElementById('lb-img')
+  const vid=document.getElementById('lb-vid')
+  if(item.type==='photo'){img.src=url;img.style.display='block';vid.style.display='none';vid.src=''}
+  else{vid.src=url;vid.style.display='block';img.style.display='none';img.src=''}
+  document.getElementById('lb-info').textContent=`${item.convTitle} · ${item.sender} · ${fmtTs(item.ts)}`
+  document.getElementById('lb-counter').textContent=`${idx+1}/${galleryLbItems.length}`
+  document.getElementById('lightbox').classList.add('open')
+}
+// ───────────────────────────────────────────────────────────
 
 function resetApp(){
   conversations=[];filteredList=[];activeConv=null;allFiles=[];fileMap={};fileMapFull={};lbItems=[]
